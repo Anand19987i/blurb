@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import axios from 'axios';
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router';
+import { Link } from 'react-router-dom';
 
 const Signup = () => {
 
@@ -75,8 +76,11 @@ const Signup = () => {
           <label>Profile Image<span className="text-amber-500"> *</span></label>
           <input type="file" onChange={fileHandler} name='avatar' accept="image/*" className="p-3 rounded-lg outline-none text-slate-900 bg-white cursor-pointer" />
         </div>
-        <div className="text-white mx-auto my-4">
-          <Button type="submit" className="font-bold text-slate-900 text-md p-5 bg-white hover:bg-gray-400">Sign Up</Button>
+        <div>
+          <span className='text-gray-400'>Already have a account ? <Link to="/login" className='text-blue-400'>Login</Link></span>
+        </div>
+        <div className="mx-auto my-4">
+          <Button type="submit" className="font-bold text-slate-900 text-md p-5 bg-white hover:bg-gray-400">Sign up</Button>
         </div>
       </form>
     </div>
