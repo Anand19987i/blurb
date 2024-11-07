@@ -1,6 +1,8 @@
 import { Button } from '@/components/ui/button';
+import { setLoading } from '@/redux/authSlice';
 import axios from 'axios';
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
 import { Link } from 'react-router-dom';
 
@@ -11,8 +13,11 @@ const Signup = () => {
     email: "",
     password: "",
     confirmPassword: "",
-    avatar: null
+    avatar: ""
   });
+  const {loading,user} = useSelector(store=>store.auth);
+    const dispatch = useDispatch();
+
   const changeHandler = (e) => {
     const { name, value } = e.target;
     setInput({ ...input, [name]: value })
@@ -20,7 +25,6 @@ const Signup = () => {
   const fileHandler = (e) => {
     setInput({ ...input, avatar: e.target.files[0] })
   }
-
   const navigate = useNavigate();
   const submitHandler = async (e) => {
     e.preventDefault();
@@ -35,6 +39,7 @@ const Signup = () => {
     }
 
     try {
+      dispatch(setLoading(true));
       const response = await axios.post("http://localhost:3000/api/v1/user/register", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
@@ -43,12 +48,18 @@ const Signup = () => {
       })
       if (response.status === 201) {
         console.log("SignUp successfully");
-        navigate('/');
+        navigate('/login');
       }
     } catch (error) {
       console.log(error);
+      dispatch(setLoading(false));
     }
   }
+  useEffect(() => {
+    if (user) {
+      navigate("/");
+    }
+  }, [])
 
   return (
     <div className="flex flex-col bg-slate-950 h-screen items-center">
