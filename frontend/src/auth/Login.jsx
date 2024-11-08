@@ -27,7 +27,7 @@ const Login = () => {
     useEffect(() => {
         const storedUser = localStorage.getItem('user');
         if (storedUser) {
-          dispatch(setUser(JSON.parse(storedUser))); // Load user data from localStorage into Redux store
+          dispatch(setUser(JSON.parse(storedUser)));
         }
       }, [dispatch]);
     const handleSubmit = async (e) => {

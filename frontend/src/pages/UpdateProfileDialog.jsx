@@ -7,12 +7,13 @@ import { useDispatch, useSelector } from 'react-redux';
 
 const UpdateProfileDialog = ({ open, setOpen }) => {
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
     const { user } = useSelector(store => store.auth);
     const [input, setInput] = useState({
         name: user?.name || "",
-        email: user?.email || "",
-        avatar: null
+        email: user?.email || ""
     });
+    const [avatar, setAvatar] = useState(null);
     const dispatch = useDispatch();
 
     const changeEventHandler = (e) => {
@@ -22,36 +23,41 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
     const fileChangeHandler = (e) => {
         const file = e.target.files?.[0];
         if (file) {
-            setInput({ ...input, avatar: file });
+            setAvatar(file);
         }
     };
 
     const submitHandler = async (e) => {
         e.preventDefault();
+        setError(null);
+        
         const formData = new FormData();
         formData.append("name", input.name);
         formData.append("email", input.email);
-        if (input.avatar) {
-            formData.append("avatar", input.avatar);
+        if (avatar) {
+            formData.append("avatar", avatar);
         }
 
         try {
             setLoading(true);
-            const res = await axios.post(`${USER_API_END_POINT}/profile/${user.id}`, formData, {
+            const res = await axios.post(`${USER_API_END_POINT}/profile/${user._id}`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 },
                 withCredentials: true
             });
             if (res.data.success) {
-                dispatch(setUser(res.data.user)); // assuming `res.data.user` contains updated user data
+                dispatch(setUser(res.data.user));
+                setOpen(false);
+            } else {
+                setError("Profile update failed.");
             }
         } catch (error) {
             console.error(error);
+            setError("An error occurred while updating profile.");
         } finally {
             setLoading(false);
         }
-        setOpen(false);
     };
 
     return (
@@ -87,7 +93,7 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
                             />
                         </div>
                         <div className="flex flex-col text-white">
-                            <label>Profile Image<span className="text-amber-500"> *</span></label>
+                            <label>Profile Image</label>
                             <input 
                                 type="file" 
                                 onChange={fileChangeHandler} 
@@ -96,6 +102,7 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
                                 className="p-3 rounded-lg outline-none text-slate-900 bg-white cursor-pointer" 
                             />
                         </div>
+                        {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
                     </div>
                     <DialogFooter className="mt-5">
                         <button type="submit" disabled={loading} className='bg-white text-black px-3 p-1 rounded-md font-semibold'>

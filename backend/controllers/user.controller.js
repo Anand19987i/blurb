@@ -78,7 +78,7 @@ export const login = async (req, res) => {
               message: "Logged in successfully",
               success: true,
               user: { 
-                  id: user.id,
+                  id: user._id,
                   name: user.name,
                   email: user.email,
                   avatar: user.avatar
@@ -121,15 +121,15 @@ export const googleLogin = async (req, res) => {
   try {
     const ticket = await client.verifyIdToken({
       idToken: token,
-      audience: process.env.CLIENT_ID, // Replace with your Google OAuth2 client ID
+      audience: process.env.CLIENT_ID,
     });
+
     const payload = ticket.getPayload();
     const { email, name, picture } = payload;
 
     let user = await User.findOne({ email });
 
     if (!user) {
-
       const cloudinaryResult = await cloudinary.uploader.upload(picture, {
         folder: 'user_avatars',
         public_id: `avatar_${email}`,
@@ -140,40 +140,30 @@ export const googleLogin = async (req, res) => {
       user = await User.create({
         name,
         email,
-        gender: 'google-login',
-        password: 'google-login', 
+        password: 'google-login',
         confirmPassword: 'google-login',
-        avatar: cloudinaryResult.secure_url, 
+        avatar: cloudinaryResult.secure_url,
       });
-
-      return res.status(200).json({
-        message: "Logged in successfully",
-        success: true,
-        user: { 
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            avatar: user.avatar
-        }
-    });
-      
-
-      console.log('New user created:', user);
-    } else {
-      console.log('User already exists:', user);
     }
+
     setAuthToken(user, res);
 
     return res.status(200).json({
       message: 'Login successful',
       success: true,
-      user, 
+      user: {
+        id: user._id, // Ensure you're returning _id, not id
+        name: user.name,
+        email: user.email,
+        avatar: user.avatar
+      },
     });
   } catch (error) {
     console.error(error);
     return res.status(400).json({ success: false, message: 'Invalid Google token' });
   }
 };
+
 
 export const updateProfile = async (req, res) => {
   try {
@@ -201,7 +191,7 @@ export const updateProfile = async (req, res) => {
     }
     await user.save();
     user = {
-      _id : user._id,
+      id : user._id,
       name: user.name,
       email: user.email,
       avatar: user.avatar
