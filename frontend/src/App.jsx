@@ -3,6 +3,7 @@ import { createBrowserRouter, RouterProvider, useNavigate } from 'react-router-d
 import Home from './pages/Home'
 import Signup from './auth/Signup'
 import Login from './auth/Login'
+import ViewProfile from './pages/ViewProfile'
 
 const App = () => {
   const appRouter = createBrowserRouter([
@@ -17,6 +18,10 @@ const App = () => {
     {
       path: '/login',
       element: <Login />
+    },
+    {
+      path: '/profile/:id',
+      element: <ViewProfile />
     }
   ])
   

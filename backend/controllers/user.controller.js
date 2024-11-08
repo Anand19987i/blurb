@@ -78,6 +78,7 @@ export const login = async (req, res) => {
               message: "Logged in successfully",
               success: true,
               user: { 
+                  id: user.id,
                   name: user.name,
                   email: user.email,
                   avatar: user.avatar
@@ -145,6 +146,18 @@ export const googleLogin = async (req, res) => {
         avatar: cloudinaryResult.secure_url, 
       });
 
+      return res.status(200).json({
+        message: "Logged in successfully",
+        success: true,
+        user: { 
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            avatar: user.avatar
+        }
+    });
+      
+
       console.log('New user created:', user);
     } else {
       console.log('User already exists:', user);
@@ -161,3 +174,48 @@ export const googleLogin = async (req, res) => {
     return res.status(400).json({ success: false, message: 'Invalid Google token' });
   }
 };
+
+export const updateProfile = async (req, res) => {
+  try {
+    const {name, email } = req.body;
+    const file = req.file;
+    const fileUri = getDataUri(file);
+    const cloudResponse = await cloudinary.uploader.upload(fileUri.content);
+
+    const userId = req.id;
+    let user = await User.findById(userId);
+    setAuthToken(user, res);
+
+    if (!user) {
+      return res.status(400).json({
+        message: "User not found.",
+        success: false
+      })
+    }
+
+    if (name) user.name = name;
+    if (email) user.email = email;
+    
+    if (cloudResponse) {
+      user.avatar = cloudResponse.secure_url;
+    }
+    await user.save();
+    user = {
+      _id : user._id,
+      name: user.name,
+      email: user.email,
+      avatar: user.avatar
+    }
+    return res.status(200).json({
+      message: "Profile update successfully",
+      success: true,
+    })
+  }
+  catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      message: "Internal Server error",
+      success: false
+    });
+  }
+}
