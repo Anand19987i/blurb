@@ -33,6 +33,7 @@ export const fetchPosts = () => async (dispatch) => {
     dispatch(setLoading(true));
     try {
         const response = await axios.get(`${POST_API_END_POINT}/v/feed`);
+        console.log('Fetched Posts:', response.data.posts); // Log response to inspect the data
         dispatch(setPosts(response.data.posts));
     } catch (error) {
         dispatch(setError("Failed to fetch posts"));
@@ -40,6 +41,7 @@ export const fetchPosts = () => async (dispatch) => {
         dispatch(setLoading(false));
     }
 };
+
 
 // Fetch posts by a specific user
 export const fetchUserPosts = (userId) => async (dispatch) => {
