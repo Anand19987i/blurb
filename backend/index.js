@@ -15,7 +15,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 const corsOptipn = {
-    origin: "http://localhost:5173",
+    origin: "https://blurb-6zkl.onrender.com",
     credentials: true,
 }
 app.use(cors(corsOptipn));
