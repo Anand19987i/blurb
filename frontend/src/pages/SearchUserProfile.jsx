@@ -65,5 +65,27 @@
 //         </div>
 //     );
 // };
+import React from 'react';
+import { FaTools } from 'react-icons/fa';
+const SearchUserProfile = () => {
+    return (
+        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white p-6">
+            <FaTools className="text-7xl mb-4 text-yellow-500 animate-pulse" />
+            <h1 className="text-4xl font-bold mb-4">We'll Be Right Back!</h1>
+            <p className="text-lg text-center max-w-lg mb-6">
+                We're currently performing some maintenance to improve your experience.
+                Please bear with us while we make some updates. We'll be back online shortly.
+            </p>
+            <button
+                onClick={() => window.location.reload()}
+                className="px-6 py-3 bg-yellow-500 text-gray-900 font-semibold rounded-lg hover:bg-yellow-600 transition-colors duration-200"
+            >
+                Refresh Page
+            </button>
+        </div>
+    );
+};
 
-// export default SearchUserProfile;
+
+
+export default SearchUserProfile;
