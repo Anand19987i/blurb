@@ -1,6 +1,7 @@
 import express from "express";
-import { googleLogin, login, logout, register, updateProfile } from "../controllers/user.controller.js";
+import { getProfile, googleLogin, login, logout, register, search, updateProfile } from "../controllers/user.controller.js";
 import { singleUpload } from "../middlewares/multer.js";
+import isAuthenticated from "../middlewares/isAuthenticated.js";
 
 
 const router = express.Router();
@@ -10,5 +11,7 @@ router.route("/login").post(login);
 router.route("/logout").get(logout);
 router.route("/google-login").post(singleUpload, googleLogin);
 router.route("/profile/:id").post(singleUpload, updateProfile);
+router.route("/search").get(search);
+router.route("/search/profile/:id").get(getProfile);
 
 export default router

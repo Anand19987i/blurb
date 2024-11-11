@@ -9,21 +9,21 @@ import { POST_API_END_POINT } from '../utils/constant';
 const PostCard = ({ post }) => {
     const dispatch = useDispatch();
     const { user } = useSelector(store => store.auth);
-    const [liked, setLiked] = useState(post.likes?.includes(user?.id) || false);
     const [showComments, setShowComments] = useState(false);
+    const [liked, setLiked] = useState(post.likes?.includes(user?.id) || false);
     const [comments, setComments] = useState(post.comments || []);
+    const [likesCount, setLikesCount] = useState(post.likes ? post.likes.length : 0);
     const [commentInput, setCommentInput] = useState('');
     const [isContentExpanded, setIsContentExpanded] = useState(false);
-    const [likesCount, setLikesCount] = useState(post.likes ? post.likes.length : 0);
 
 
     useEffect(() => {
-        if (post.likes && user) {
-            setLiked(post.likes.includes(user.id));
-        }
-    }, [post.likes, user]);
-    
-    
+        setLikesCount(post.likes?.length || 0);
+        setComments(post.comments || []);
+    }, [post]);
+
+
+
 
 
     const handleCommentClick = () => {
@@ -42,16 +42,16 @@ const PostCard = ({ post }) => {
                     console.error('No token found');
                     return;
                 }
-
+    
                 // Create the new comment with user info (name and avatar from the logged-in user)
                 const newComment = {
                     user: { _id: user.id, name: user.name, avatar: user.avatar }, // Correctly using logged-in user data
                     text: commentInput,
                 };
-
+    
                 // Optimistically update the UI by adding the new comment
                 setComments((prevComments) => [...prevComments, newComment]);
-
+    
                 // Send the comment to the server
                 const response = await axios.post(
                     `${POST_API_END_POINT}/posts/${post._id}/comment`,
@@ -62,17 +62,17 @@ const PostCard = ({ post }) => {
                         },
                     }
                 );
-
-                // In case the server response is different or needs to be corrected, update the state with the server response
+    
+                // Update comments with the latest response data from the server
                 setComments(response.data.comments);
                 setCommentInput('');  // Clear the input field
-
+    
             } catch (error) {
                 console.error("Error adding comment:", error);
             }
         }
     };
-
+    
 
 
 
@@ -96,6 +96,7 @@ const PostCard = ({ post }) => {
             setLiked(false);
         }
     };
+
 
     const handleUnlikeClick = async () => {
         const token = localStorage.getItem('auth_token');
@@ -132,9 +133,9 @@ const PostCard = ({ post }) => {
         } else {
             console.log('Share not supported on this browser.');
         }
-    };
+    }
+const formattedTime = moment(post.createdAt).fromNow();
 
-    const formattedTime = moment(post.createdAt).fromNow();
 
     const handleReadMoreToggle = () => {
         setIsContentExpanded(!isContentExpanded);
@@ -213,17 +214,24 @@ const PostCard = ({ post }) => {
                             <h3 className="text-white text-lg">Comments</h3>
                             {comments.map((comment) => (
                                 <div key={comment._id} className="flex items-start gap-2 mt-2">
+                                    {/* Check if the user data is available */}
                                     <Avatar className="w-6 h-6">
-                                        <AvatarImage src={comment.user?.avatar || '/default-avatar.png'} />
+                                        <AvatarImage
+                                            src={comment.user ? comment.user.avatar || '/default-avatar.png' : '/default-avatar.png'}
+                                            alt={comment.user ? comment.user.name : 'Anonymous'}
+                                        />
                                     </Avatar>
                                     <div className="flex flex-col">
-                                        <p className="text-sm text-white font-semibold">{comment.user?.name}</p>
+                                        <p className="text-sm text-white font-semibold">
+                                            {comment.user ? comment.user.name : 'Anonymous'}
+                                        </p>
                                         <p className="text-xs text-gray-300">{comment.text}</p>
                                     </div>
                                 </div>
                             ))}
                         </div>
                     )}
+
                 </div>
             )}
         </div>

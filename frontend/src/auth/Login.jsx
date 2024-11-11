@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import store from '@/redux/store';
-import { setLoading, setUser } from '@/redux/authSlice';
+import { setLoading, setToken, setUser } from '@/redux/authSlice';
 import { useDispatch, useSelector } from 'react-redux';
 
 const Login = () => {
@@ -15,7 +15,7 @@ const Login = () => {
         email: "",
         password: "",
     });
-    const { loading, user } = useSelector(store => store.auth);
+    const { loading, user, token } = useSelector(store => store.auth);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -24,12 +24,7 @@ const Login = () => {
 
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    useEffect(() => {
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-          dispatch(setUser(JSON.parse(storedUser)));
-        }
-      }, [dispatch]);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -37,11 +32,17 @@ const Login = () => {
             const res = await axios.post(`${USER_API_END_POINT}/login`, input, {
                 headers: {
                     "Content-Type": "application/json",
-                }, withCredentials: true,
+                },
+                withCredentials: true,
             });
+            console.log('Login Response:', res.data); // Log the entire response
+
             if (res.data.success) {
                 dispatch(setUser(res.data.user));
+                dispatch(setToken(res.data.token));  // Ensure token is in the response
                 localStorage.setItem('user', JSON.stringify(res.data.user));
+                localStorage.setItem('auth_token', res.data.token);  // Store token in localStorage
+                console.log("Token Stored:", res.data.token);  // Check if token is being saved
                 navigate('/');
             }
         } catch (error) {
@@ -50,6 +51,8 @@ const Login = () => {
             dispatch(setLoading(false));
         }
     };
+
+
     useEffect(() => {
         if (user) {
             navigate("/");
@@ -61,11 +64,16 @@ const Login = () => {
             dispatch(setLoading(true));
             const { credential } = response;
             const res = await axios.post(`${USER_API_END_POINT}/google-login`, { token: credential }, {
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                },
             });
             if (res.data.success) {
                 dispatch(setUser(res.data.user));
+                dispatch(setToken(res.data.token));
                 localStorage.setItem('user', JSON.stringify(res.data.user));
+                localStorage.setItem('token', res.data.token);
+                console.log("Token Stored:", res.data.token)
                 navigate('/');
             }
         } catch (error) {
@@ -74,6 +82,8 @@ const Login = () => {
             dispatch(setLoading(false));
         }
     };
+
+
 
     const handleGoogleFailure = (error) => {
         console.error('Google Sign-In was unsuccessful', error);

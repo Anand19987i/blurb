@@ -4,6 +4,7 @@ import cloudinary from "../config/cloudinary.js";
 import getDataUri from "../config/datauri.js";
 import { setAuthToken } from "../config/tokenUtils.js";
 import { OAuth2Client } from 'google-auth-library';
+import { Post } from "../models/post.model.js";
 
 const client = new OAuth2Client(process.env.CLIENT_ID); 
 
@@ -73,17 +74,6 @@ export const login = async (req, res) => {
       }
       if (password === user.password) {
           setAuthToken(user, res); 
-
-          return res.status(200).json({
-              message: "Logged in successfully",
-              success: true,
-              user: { 
-                  id: user._id,
-                  name: user.name,
-                  email: user.email,
-                  avatar: user.avatar
-              }
-          });
       } else {
           return res.status(401).json({
               message: "Invalid credentials",
@@ -147,17 +137,6 @@ export const googleLogin = async (req, res) => {
     }
 
     setAuthToken(user, res);
-
-    return res.status(200).json({
-      message: 'Login successful',
-      success: true,
-      user: {
-        id: user._id, // Ensure you're returning _id, not id
-        name: user.name,
-        email: user.email,
-        avatar: user.avatar
-      },
-    });
   } catch (error) {
     console.error(error);
     return res.status(400).json({ success: false, message: 'Invalid Google token' });
@@ -209,3 +188,30 @@ export const updateProfile = async (req, res) => {
     });
   }
 }
+
+export const search  = async (req, res) => {
+  const {query} = req.query;
+  try {
+    const users = await User.find({
+      name: {$regex: query, $options: 'i'}
+    }).select('name avatar');
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({message: "Error searching for users"});
+  }
+}
+
+export const getProfile = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    const posts = await Post.find({ userId: userId }); // Get posts by user
+    res.json({ user, posts });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};

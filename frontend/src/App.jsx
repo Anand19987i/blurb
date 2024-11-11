@@ -4,6 +4,7 @@ import Home from './pages/Home'
 import Signup from './auth/Signup'
 import Login from './auth/Login'
 import ViewProfile from './pages/ViewProfile'
+import SearchUserProfile from './pages/SearchUserProfile'
 
 const App = () => {
   const appRouter = createBrowserRouter([
@@ -22,6 +23,10 @@ const App = () => {
     {
       path: '/profile/:id',
       element: <ViewProfile />
+    },
+    {
+      path: '/search/profile/:id',
+      element: <SearchUserProfile />
     }
   ])
   

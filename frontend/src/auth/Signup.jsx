@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
-import { setLoading } from '@/redux/authSlice';
+import { setLoading, setUser } from '@/redux/authSlice';
+import { USER_API_END_POINT } from '@/utils/constant';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
@@ -40,13 +41,13 @@ const Signup = () => {
 
     try {
       dispatch(setLoading(true));
-      const response = await axios.post("http://localhost:3000/api/v1/user/register", formData, {
+      const response = await axios.post(`${USER_API_END_POINT}/register`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
         withCredentials: true,
       })
-      if (response.status === 201) {
+      if (response.status !== 400) {
         console.log("SignUp successfully");
         navigate('/login');
       }

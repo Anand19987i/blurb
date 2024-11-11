@@ -12,6 +12,7 @@ import {
 } from 'redux-persist';
 import storageSession from 'redux-persist/lib/storage/session'; 
 import storage from 'redux-persist/lib/storage';
+import postSlice from "./postSlice";
 
 const storageType = process.env.NODE_ENV === 'production' ? storage : storageSession; 
 
@@ -23,6 +24,7 @@ const persistConfig = {
 
 const rootReducer = combineReducers({
     auth: authSlice,
+    post: postSlice,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
