@@ -9,7 +9,7 @@ export const searchUsers = createAsyncThunk(
       const response = await axios.get(`${USER_API_END_POINT}/search`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
-        },
+        }, withCredentials: true,
         params: {query}
       });
       return response.data;

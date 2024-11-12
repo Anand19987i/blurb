@@ -112,7 +112,7 @@ const PostCard = ({ post }) => {
             const response = await axios.post(
                 `${POST_API_END_POINT}/posts/${post._id}/like`,
                 { userId: user.id },
-                { headers: { Authorization: `Bearer ${token}` } }
+                { headers: { Authorization: `Bearer ${token}` }, withCredentials:true }
             );
             setLikesCount(response.data.post.likes.length);
             setLiked(false);

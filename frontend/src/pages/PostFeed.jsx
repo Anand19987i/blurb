@@ -6,7 +6,7 @@ import PostCard from './PostCard';  // Import the PostCard component
 
 const PostFeed = () => {
     const dispatch = useDispatch();
-    const { posts, loading, error } = useSelector((store) => store.post);
+    const { posts, loading, error } = useSelector(store => store.post);
 
     useEffect(() => {
         dispatch(fetchPosts());  // Dispatch the action to fetch posts
