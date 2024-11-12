@@ -15,9 +15,18 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 const corsOptipn = {
-    origin: "https://blurb-6zkl.onrender.com",
-    credentials: true,
+    origin: 'https://your-frontend-domain.com', // replace with your frontend domain
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], // allowed methods
+    credentials: true // enable cookies if needed
 }
+
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', 'https://blurb-6zkl.onrender.com');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    next();
+});
 app.use(cors(corsOptipn));
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/post", postRoute);
