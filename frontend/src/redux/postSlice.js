@@ -32,19 +32,14 @@ export const fetchPosts = () => async (dispatch) => {
     dispatch(setLoading(true));
     try {
         const response = await axios.get(`${POST_API_END_POINT}/v/feed`, { withCredentials: true });
-        console.log('Fetched Posts:', response.data.posts); // Check what the backend is returning
-        if (Array.isArray(response.data.posts)) {
-            dispatch(setPosts(response.data.posts));  // Ensure it's an array before dispatching
-        } else {
-            throw new Error("Posts are not in expected format");
-        }
+        console.log('Fetched Posts:', response.data.posts);
+        dispatch(setPosts(response.data.posts));
     } catch (error) {
         dispatch(setError(error.response?.data?.message || "Failed to fetch posts"));
     } finally {
         dispatch(setLoading(false));
     }
 };
-
 
 // Fetch posts by a specific user
 export const fetchUserPosts = (userId) => async (dispatch) => {

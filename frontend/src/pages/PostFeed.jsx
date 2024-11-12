@@ -10,7 +10,7 @@ const PostFeed = () => {
 
     useEffect(() => {
         dispatch(fetchPosts()); 
-        console.log(store.getState().post);  // Check the Redux state for posts
+
     }, [dispatch]);
 
     if (loading) return <p>Loading posts...</p>;
