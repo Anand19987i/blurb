@@ -8,6 +8,7 @@ import store from '../redux/store';
 const PostFeed = () => {
     const dispatch = useDispatch();
     const { posts, loading, error } = useSelector(store => store.post);
+    const {user} = useSelector(store => store.auth);
 
     useEffect(() => {
         // Fetch only the logged-in user's posts when viewing profile
