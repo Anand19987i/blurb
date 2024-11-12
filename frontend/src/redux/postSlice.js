@@ -28,42 +28,44 @@ const postSlice = createSlice({
 
 export const { setLoading, setPosts, setUserProfile, setError } = postSlice.actions;
 
-// Fetch posts from the feed
 export const fetchPosts = () => async (dispatch) => {
     dispatch(setLoading(true));
     try {
-        const response = await axios.get(`${POST_API_END_POINT}/v/feed`);
-        console.log('Fetched Posts:', response.data.posts); // Log response to inspect the data
+        const response = await axios.get(`${POST_API_END_POINT}/v/feed`, { withCredentials: true });
+        console.log('Fetched Posts:', response.data.posts);
         dispatch(setPosts(response.data.posts));
     } catch (error) {
-        dispatch(setError("Failed to fetch posts"));
+        dispatch(setError(error.response?.data?.message || "Failed to fetch posts"));
     } finally {
         dispatch(setLoading(false));
     }
 };
-
 
 // Fetch posts by a specific user
 export const fetchUserPosts = (userId) => async (dispatch) => {
     dispatch(setLoading(true));
     try {
-        const response = await axios.get(`${POST_API_END_POINT}/posts/user/${userId}`);
+        const response = await axios.get(`${POST_API_END_POINT}/posts/user/${userId}`, { withCredentials: true });
+        console.log('Fetched User Posts:', response.data.posts);
         dispatch(setPosts(response.data.posts));
     } catch (error) {
-        console.error("Failed to fetch user posts", error);
-        dispatch(setError("Failed to fetch user posts"));
+        console.error("Failed to fetch user posts:", error);
+        dispatch(setError(error.response?.data?.message || "Failed to fetch user posts"));
     } finally {
         dispatch(setLoading(false));
     }
 };
+
+// Fetch user profile
 export const fetchUserProfile = (userId) => async (dispatch) => {
   dispatch(setLoading(true));
   try {
-    const response = await axios.get(`${USER_API_END_POINT}/search/profile/${userId}`);
-    dispatch(setUserProfile(response.data)); // Dispatch user and posts to the Redux store
+    const response = await axios.get(`${USER_API_END_POINT}/search/profile/${userId}`, { withCredentials: true });
+    console.log('Fetched User Profile:', response.data);
+    dispatch(setUserProfile(response.data));
   } catch (error) {
     console.error('Failed to fetch user profile:', error);
-    dispatch(setError('Failed to fetch user profile'));
+    dispatch(setError(error.response?.data?.message || 'Failed to fetch user profile'));
   } finally {
     dispatch(setLoading(false));
   }

@@ -60,6 +60,7 @@ const PostCard = ({ post }) => {
                         headers: {
                             Authorization: `Bearer ${token}`,
                         },
+                        withCredentials: true,
                     }
                 );
 
@@ -89,6 +90,7 @@ const PostCard = ({ post }) => {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
+                withCredentials: true,
             });
         } catch (error) {
             console.error('Error liking post:', error);
