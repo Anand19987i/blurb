@@ -9,7 +9,8 @@ const PostFeed = () => {
     const { posts, loading, error } = useSelector(store => store.post);
 
     useEffect(() => {
-        dispatch(fetchPosts());  // Dispatch the action to fetch posts
+        dispatch(fetchPosts()); 
+        console.log(store.getState().post);  // Check the Redux state for posts
     }, [dispatch]);
 
     if (loading) return <p>Loading posts...</p>;
