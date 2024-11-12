@@ -1,17 +1,20 @@
 // src/components/PostFeed.js
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchPosts } from '../redux/postSlice';  // Import the fetchPosts action
+import { fetchPosts, fetchUserPosts } from '../redux/postSlice';  // Import the fetchPosts action
 import PostCard from './PostCard';  // Import the PostCard component
+import store from '../redux/store';
 
 const PostFeed = () => {
     const dispatch = useDispatch();
     const { posts, loading, error } = useSelector(store => store.post);
 
     useEffect(() => {
-        dispatch(fetchPosts()); 
-
-    }, [dispatch]);
+        // Fetch only the logged-in user's posts when viewing profile
+        if (user && user.id) {
+            dispatch(fetchUserPosts(user.id));
+        }
+    }, [dispatch, user]);
 
     if (loading) return <p>Loading posts...</p>;
     if (error) return <p>{error}</p>;
