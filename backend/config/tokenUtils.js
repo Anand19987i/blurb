@@ -4,7 +4,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 const COOKIE_OPTIONS = {
     httpOnly: true,  // Cookie will not be accessible via JavaScript
-    secure: true,    // Set to true in production with HTTPS
+    secure: process.env.NODE_ENV === "production",    // Set to true in production with HTTPS
     sameSite: 'strict',  // Ensures cookie is only sent in first-party context
     maxAge: 7 * 24 * 60 * 60 * 1000,  // 1 week
 };
