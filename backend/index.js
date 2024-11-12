@@ -15,7 +15,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 const corsOptipn = {
-    origin: 'https://your-frontend-domain.com', // replace with your frontend domain
+    origin: 'https://blurb-6zkl.onrender.com', // replace with your frontend domain
     methods: ['GET', 'POST', 'PUT', 'DELETE'], // allowed methods
     credentials: true // enable cookies if needed
 }
