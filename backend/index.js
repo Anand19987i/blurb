@@ -15,7 +15,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 const corsOptions = {
-    origin: 'https://blurb-uyz5.onrender.com', // replace with your frontend domain
+    origin: ' https://blurb-uyz5.onrender.com', // replace with your frontend domain
     methods: ['GET', 'POST', 'PUT', 'DELETE'], // allowed methods
     credentials: true, // allow cookies if needed
 };
@@ -23,7 +23,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use((req, res, next) => {
     console.log('Setting CORS headers');
-    res.header('Access-Control-Allow-Origin', 'https://blurb-uyz5.onrender.com');
+    res.header('Access-Control-Allow-Origin', ' https://blurb-uyz5.onrender.com');
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     res.header('Access-Control-Allow-Credentials', 'true');
@@ -38,3 +38,4 @@ app.listen(port, () => {
     connectDB();
     console.log(`Server is listening at ${port}`);
 });
+// https://blurb-uyz5.onrender.com

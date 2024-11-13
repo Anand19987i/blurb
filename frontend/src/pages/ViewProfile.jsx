@@ -15,7 +15,6 @@ const ViewProfile = () => {
     const dispatch = useDispatch();
 
     useEffect(() => {
-        // Fetch only the logged-in user's posts when viewing profile
         if (user && user.id) {
             dispatch(fetchUserPosts(user.id));
         }
