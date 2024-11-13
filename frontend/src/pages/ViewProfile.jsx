@@ -11,24 +11,24 @@ import UserPostCard from './UserPostCard';
 const ViewProfile = () => {
     const [open, setOpen] = useState(false);
     const { user } = useSelector(store => store.auth);
-    const { userPosts, loading } = useSelector(store => store.post);
+    const { userPosts, loading, error } = useSelector(store => store.post);
     const dispatch = useDispatch();
 
     useEffect(() => {
         if (user && user.id) {
             dispatch(fetchUserPosts(user.id));
         }
-    }, [dispatch, user])
+    }, [dispatch, user]);
     
-    const postList = Array.isArray(userPosts) ? userPosts : [];;
+    const postList = Array.isArray(userPosts) ? userPosts : [];
 
     return (
         <div className="w-full min-h-screen bg-gray-950 pb-5">
             <Navbar />
             <div className="flex flex-col items-center mt-2 p-4 w-full sm:w-3/4 lg:w-1/2 xl:w-1/3 mx-auto bg-slate-900 text-white shadow-lg rounded-lg">
-                <div className="flex flex-col md:flex-row md:gap-7 items-center text-center md:text-left"> {/* Add relative positioning */}
+                <div className="flex flex-col md:flex-row md:gap-7 items-center text-center md:text-left">
                     <Avatar className="w-24 h-24 md:w-32 md:h-32">
-                        <AvatarImage src={user?.avatar || '/default-avatar.png'} alt={user?.name} className='z-auto' />
+                        <AvatarImage src={user?.avatar || '/default-avatar.png'} alt={user?.name} className="z-auto" />
                     </Avatar>
                     <div className="flex flex-col my-3">
                         <h1 className="text-2xl font-semibold">{user?.name}</h1>
@@ -36,7 +36,7 @@ const ViewProfile = () => {
                     </div>
                 </div>
                 <div className="mt-6">
-                    <Button onClick={() => setOpen(true)} variant="outline" className=" text-black flex items-center gap-2">
+                    <Button onClick={() => setOpen(true)} variant="outline" className="text-black flex items-center gap-2">
                         <Pen /> Edit Profile
                     </Button>
                 </div>
@@ -47,6 +47,8 @@ const ViewProfile = () => {
                 <h2 className="text-2xl font-semibold mb-6 lg:text-center md:text-center sm:text-center text-white">Posts by {user?.name}</h2>
                 {loading ? (
                     <p className="text-center text-gray-400">Loading posts...</p>
+                ) : error ? (
+                    <p className="text-center text-gray-500">{error}</p>
                 ) : (
                     <div className="space-y-6">
                         {postList.length > 0 ? (

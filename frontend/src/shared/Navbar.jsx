@@ -6,9 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage } from '@/components/ui/avatar';
 import { AiFillHome } from "react-icons/ai";
 import { IoSearch, IoMenu } from "react-icons/io5";
-import { LogOut } from 'lucide-react';
+import { LogOut, User2 } from 'lucide-react';
 import axios from 'axios';
 import { USER_API_END_POINT } from '@/utils/constant';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 const Navbar = () => {
   const { user } = useSelector((store) => store.auth);
@@ -84,9 +85,36 @@ const Navbar = () => {
             )}
           </div>
           {user ? (
-            <Avatar className="cursor-pointer">
-              <AvatarImage src={user.avatar || '/default-avatar.png'} />
-            </Avatar>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Avatar className="cursor-pointer">
+                  <AvatarImage src={user.avatar || '/default-avatar.png'} />
+                </Avatar>
+              </PopoverTrigger>
+              <PopoverContent className='bg-slate-950 border-gray-900'>
+                <div className='flex gap-4'>
+                  <Avatar className="cursor-pointer">
+                    <AvatarImage src={user.avatar || '/default-avatar.png'} />
+                  </Avatar>
+                  <div>
+                    <p className='text-white font-semibold'>{user.name}</p>
+                    <p className='text-gray-300 text-sm'>{user.email}</p>
+                  </div>
+                </div>
+                <div className='flex gap-4'>
+                  <div className='text-white flex my-4 gap-1'>
+                    <User2/>
+                    <Link to={`/profile/${user.id}`}><button className='text-white outline-none bg-none'>View Profile</button></Link>
+                  </div>
+                  <div className='text-white flex my-4 gap-1'>
+                    <LogOut/>
+                    <button onClick={() => logoutHandler()} className='text-white outline-none bg-none'>Logout</button>
+                  </div>
+                </div>
+              </PopoverContent>
+
+            </Popover>
+
           ) : (
             <div className="flex gap-2">
               <Link to="/login">
@@ -100,7 +128,7 @@ const Navbar = () => {
         </div>
 
         {menuOpen && (
-          <div className="absolute top-16 left-0 w-full bg-gray-900 p-4 flex flex-col gap-4 sm:hidden">
+          <div className="absolute top-16 left-0 w-full bg-gray-900 p-4 flex flex-col gap-5 sm:hidden">
             <div className="flex items-center bg-gray-800 px-3 rounded-lg">
               <IoSearch className="h-6 w-6 text-white" />
               <input

@@ -16,7 +16,7 @@ const PostFeed = () => {
     
 
     if (loading) return <p>Loading posts...</p>;
-    if (error) return <p>{error}</p>;
+    if (error) return <p className='text-gray-500 text-center'>{error}</p>;
 
     const postList = Array.isArray(feedPosts) ? feedPosts : [];
 
@@ -27,7 +27,7 @@ const PostFeed = () => {
                     <PostCard key={post._id} post={post} />  // Render each post using PostCard
                 ))
             ) : (
-                <p>No posts available</p>
+                <p className='text-gray-500'>No posts available</p>
             )}
         </div>
     );

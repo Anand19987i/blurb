@@ -52,32 +52,6 @@ export const createPost = async (req, res) => {
     }
 };
 
-export const getAllPost = async (req, res) => {
-    try {
-        const posts = await Post.find().populate('userId', 'name avatar')
-            .populate('comments.user', 'name avatar').sort({ createdAt: -1 });
-
-        if (posts.length === 0) {
-            return res.status(404).json({
-                message: "No posts found.",
-                success: false,
-            });
-        }
-
-        return res.status(200).json({
-            message: "Posts fetched successfully.",
-            success: true,
-            posts,  
-        });
-    } catch (error) {
-        console.error("Error in getAllPost:", error);
-        return res.status(500).json({
-            message: "Internal Server Error",
-            success: false,
-        });
-    }
-};
-
 // In post.controller.js
 export const toggleLike = async (req, res) => {
     const { postId } = req.params;
@@ -152,23 +126,47 @@ export const getCommentsForPost = async (req, res) => {
     }
 };
 
-// In post.controller.js
+export const getAllPost = async (req, res) => {
+    try {
+        const posts = await Post.find()
+            .populate('userId', 'name avatar')
+            .populate('comments.user', 'name avatar')
+            .sort({ createdAt: -1 });
+
+        if (!posts || posts.length === 0) {
+            return res.status(404).json({
+                message: "No posts found.",
+                success: false,
+            });
+        }
+
+        return res.status(200).json({
+            message: "Posts fetched successfully.",
+            success: true,
+            posts,
+        });
+    } catch (error) {
+        console.error("Error in getAllPost:", error);
+        return res.status(500).json({
+            message: "Internal Server Error",
+            success: false,
+        });
+    }
+};
+
+// Get posts by a specific user with user and comments populated
 export const getUserPosts = async (req, res) => {
     const { userId } = req.params;
     try {
-        const userPosts = await Post.find({ userId })
-            .populate('userId', 'name avatar') 
-            .populate({
-                path: 'comments.user',  
-                select: 'name avatar'   
-            })
-            .select('content imageUrl likes comments createdAt') 
+        const posts = await Post.find({ userId })
+            .populate('userId', 'name avatar')
+            .populate('comments.user', 'name avatar')
+            .select('content imageUrl likes comments createdAt')
             .sort({ createdAt: -1 });
 
-
-        if (userPosts.length === 0) {
+        if (!posts || posts.length === 0) {
             return res.status(404).json({
-                message: "No posts found for this user.",
+                message: "No posts yet.",
                 success: false,
             });
         }
@@ -176,7 +174,7 @@ export const getUserPosts = async (req, res) => {
         return res.status(200).json({
             message: "User posts fetched successfully.",
             success: true,
-            posts: userPosts,
+            posts,
         });
     } catch (error) {
         console.error("Error fetching user posts:", error);
