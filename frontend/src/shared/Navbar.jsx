@@ -170,9 +170,9 @@ const Navbar = () => {
                 </button>
               </>
             ) : (
-              <div className="flex gap-2">
+              <div className="flex gap-4">
                 <Link to="/login">
-                  <Button variant="outline" className="text-white mx-auto">Login</Button>
+                  <Button variant="outline" className="text-black mx-auto">Login</Button>
                 </Link>
                 <Link to="/register">
                   <Button className="bg-gray-800 text-white mx-auto">Signup</Button>
