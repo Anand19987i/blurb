@@ -114,7 +114,7 @@ const Navbar = () => {
               </PopoverContent>
             </Popover>
           ) : (
-            <div className="flex gap-2">
+            <div className="flex gap-2 mx-auto">
               <Link to="/login">
                 <Button variant="outline" className="hidden sm:block">Login</Button>
               </Link>
