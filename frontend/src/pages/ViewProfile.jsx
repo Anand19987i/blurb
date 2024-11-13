@@ -11,14 +11,16 @@ import UserPostCard from './UserPostCard';
 const ViewProfile = () => {
     const [open, setOpen] = useState(false);
     const { user } = useSelector(store => store.auth);
-    const { posts, loading } = useSelector(store => store.post);
+    const { userPosts, loading } = useSelector(store => store.post);
     const dispatch = useDispatch();
 
     useEffect(() => {
         if (user && user.id) {
             dispatch(fetchUserPosts(user.id));
         }
-    }, [dispatch, user]);
+    }, [dispatch, user])
+    
+    const postList = Array.isArray(userPosts) ? userPosts : [];;
 
     return (
         <div className="w-full min-h-screen bg-gray-950 pb-5">
@@ -47,8 +49,8 @@ const ViewProfile = () => {
                     <p className="text-center text-gray-400">Loading posts...</p>
                 ) : (
                     <div className="space-y-6">
-                        {posts.length > 0 ? (
-                            posts.map(post => (
+                        {postList.length > 0 ? (
+                            postList.map(post => (
                                 <UserPostCard key={post._id} post={post} />
                             ))
                         ) : (
