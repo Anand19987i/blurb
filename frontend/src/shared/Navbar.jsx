@@ -112,9 +112,7 @@ const Navbar = () => {
                   </div>
                 </div>
               </PopoverContent>
-
             </Popover>
-
           ) : (
             <div className="flex gap-2">
               <Link to="/login">
@@ -153,7 +151,7 @@ const Navbar = () => {
             <Link to="/" className="text-white flex mx-auto items-center gap-2" onClick={() => setMenuOpen(false)}>
               <AiFillHome className="h-6 w-6" /> Home
             </Link>
-            {user && (
+            {user ? (
               <>
                 <Link to={`/profile/${user.id}`} className="text-white mx-auto flex items-center gap-2" onClick={() => setMenuOpen(false)}>
                   <Avatar className="mr-3">
@@ -171,6 +169,15 @@ const Navbar = () => {
                   <LogOut className="h-6 w-6" /> Logout
                 </button>
               </>
+            ) : (
+              <div className="flex gap-2">
+                <Link to="/login">
+                  <Button variant="outline" className="text-white mx-auto">Login</Button>
+                </Link>
+                <Link to="/register">
+                  <Button className="bg-gray-800 text-white mx-auto">Signup</Button>
+                </Link>
+              </div>
             )}
           </div>
         )}
