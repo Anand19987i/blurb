@@ -21,15 +21,6 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.use((req, res, next) => {
-    console.log('Setting CORS headers');
-    res.header('Access-Control-Allow-Origin', 'https://blurb-azo3.onrender.com');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    res.header('Access-Control-Allow-Credentials', 'true');
-    next();
-});
-
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/post", postRoute);
 
