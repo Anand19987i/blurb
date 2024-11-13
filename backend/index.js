@@ -15,7 +15,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 const corsOptions = {
-    origin: 'https://blurb-azo3.onrender.com', // replace with your frontend domain
+    origin: 'https://blurb-pi.vercel.app', // replace with your frontend domain
     methods: ['GET', 'POST', 'PUT', 'DELETE'], // allowed methods
     credentials: true, // allow cookies if needed
 };
@@ -29,4 +29,4 @@ app.listen(port, () => {
     connectDB();
     console.log(`Server is listening at ${port}`);
 });
-// https://blurb-azo3.onrender.com
+// https://blurb-pi.vercel.app
