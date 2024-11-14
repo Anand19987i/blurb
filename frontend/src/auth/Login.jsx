@@ -63,6 +63,8 @@ const Login = () => {
         try {
             dispatch(setLoading(true));
             const { credential } = response;  // This is the Google token
+            console.log("Google Token:", credential);  // Log the token
+
             const res = await axios.post(`${USER_API_END_POINT}/google-login`, { token: credential }, {
                 headers: {
                     "Content-Type": "application/json",
@@ -128,7 +130,6 @@ const Login = () => {
 
                     <div className='mt-10 '>
                         <GoogleLogin
-                            clientId="698779511388-tlb24vrlon8ihjtqtr6sv8gjk6pak82n.apps.googleusercontent.com"
                             onSuccess={handleGoogleSuccess}
                             onError={handleGoogleFailure}
                         />

@@ -6,7 +6,7 @@ import { setAuthToken } from "../config/tokenUtils.js";
 import { OAuth2Client } from 'google-auth-library';
 import { Post } from "../models/post.model.js";
 
-const client = new OAuth2Client(process.env.CLIENT_ID); 
+const client = new OAuth2Client(process.env.CLIENT_ID);
 
 export const register = async (req, res) => {
   try {
@@ -63,50 +63,52 @@ export const register = async (req, res) => {
 
 export const login = async (req, res) => {
   try {
-      const { email, password } = req.body;
-      const user = await User.findOne({ email });
-      
-      if (!user) {
-          return res.status(500).json({
-              message: "User doesn't exist",
-              success: false
-          });
-      }
-      if (password === user.password) {
-          setAuthToken(user, res); 
-      } else {
-          return res.status(401).json({
-              message: "Invalid credentials",
-              success: false
-          });
-      }
-  } catch (error) {
-      console.log(error);
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+
+    if (!user) {
       return res.status(500).json({
-          message: "Error while logging in",
-          success: false
+        message: "User doesn't exist",
+        success: false
       });
+    }
+    if (password === user.password) {
+      setAuthToken(user, res);
+    } else {
+      return res.status(401).json({
+        message: "Invalid credentials",
+        success: false
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      message: "Error while logging in",
+      success: false
+    });
   }
 };
 
 
 export const logout = async (req, res) => {
-    try {
-        return res.status(200).cookie("token", "", { maxAge: 0 }).json({
-            message: "Logged out successfully.",
-            success: true
-        });
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({
-            message: "Internal Server Error.",
-            success: false
-        });
-    }
+  try {
+    return res.status(200).cookie("token", "", { maxAge: 0 }).json({
+      message: "Logged out successfully.",
+      success: true
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      message: "Internal Server Error.",
+      success: false
+    });
+  }
 };
 
 export const googleLogin = async (req, res) => {
   const { token } = req.body;
+  console.log("Received Token:", token);  // Log the token
+
 
   try {
     const ticket = await client.verifyIdToken({
@@ -146,7 +148,7 @@ export const googleLogin = async (req, res) => {
 
 export const updateProfile = async (req, res) => {
   try {
-    const {name, email } = req.body;
+    const { name, email } = req.body;
     const file = req.file;
     const fileUri = getDataUri(file);
     const cloudResponse = await cloudinary.uploader.upload(fileUri.content);
@@ -164,13 +166,13 @@ export const updateProfile = async (req, res) => {
 
     if (name) user.name = name;
     if (email) user.email = email;
-    
+
     if (cloudResponse) {
       user.avatar = cloudResponse.secure_url;
     }
     await user.save();
     user = {
-      id : user._id,
+      id: user._id,
       name: user.name,
       email: user.email,
       avatar: user.avatar
@@ -189,15 +191,15 @@ export const updateProfile = async (req, res) => {
   }
 }
 
-export const search  = async (req, res) => {
-  const {query} = req.query;
+export const search = async (req, res) => {
+  const { query } = req.query;
   try {
     const users = await User.find({
-      name: {$regex: query, $options: 'i'}
+      name: { $regex: query, $options: 'i' }
     }).select('name avatar');
     res.json(users);
   } catch (error) {
-    res.status(500).json({message: "Error searching for users"});
+    res.status(500).json({ message: "Error searching for users" });
   }
 }
 
