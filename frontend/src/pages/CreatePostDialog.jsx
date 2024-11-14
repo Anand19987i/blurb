@@ -5,14 +5,15 @@ import axios from 'axios';
 import TextareaAutosize from "react-textarea-autosize";
 import { useSelector } from 'react-redux';
 import { MdPhotoLibrary } from 'react-icons/md'; // Gallery icon
-import store from '@/redux/store';
+import { ImSpinner2 } from 'react-icons/im'; // Spinner icon
 
 const CreatePostDialog = ({ open, setOpen }) => {
   const { user } = useSelector(store => store.auth);
   const [input, setInput] = useState({
     content: "",
-    imageUrl: null, // Store image URL here
+    imageUrl: null,
   });
+  const [loading, setLoading] = useState(false);
 
   const changeEventHandler = (e) => {
     setInput({ ...input, [e.target.name]: e.target.value });
@@ -21,40 +22,41 @@ const CreatePostDialog = ({ open, setOpen }) => {
   const imageChangeHandler = (e) => {
     const file = e.target.files[0];
     if (file) {
-      // Generate a preview URL for the selected image
       const imageUrl = URL.createObjectURL(file);
-      setInput({ ...input, imageUrl: imageUrl, imageFile: file }); // Store the file and image URL
+      setInput({ ...input, imageUrl: imageUrl, imageFile: file });
     }
   };
 
   const submitHandler = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
     const formData = new FormData();
     formData.append("content", input.content);
     formData.append("userId", user?.id);
 
-    // Append the image file to the formData if it's selected
     if (input.imageFile) {
-        formData.append("image", input.imageFile);
+      formData.append("image", input.imageFile);
     }
 
     try {
-        const res = await axios.post(`${POST_API_END_POINT}/feed`, formData, {
-            headers: {
-                "Content-Type": "multipart/form-data",
-            },
-            withCredentials: true,
-        });
+      const res = await axios.post(`${POST_API_END_POINT}/feed`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        withCredentials: true,
+      });
 
-        if (res.status === 201) {
-            setOpen(false);
-            setInput({ content: "", imageUrl: null, imageFile: null });
-        }
+      if (res.status === 201) {
+        setOpen(false);
+        setInput({ content: "", imageUrl: null, imageFile: null });
+      }
     } catch (error) {
-        console.log(error);
+      console.log(error);
+    } finally {
+      setLoading(false);
     }
-};
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -84,7 +86,6 @@ const CreatePostDialog = ({ open, setOpen }) => {
               className="hidden"
             />
 
-            {/* Show image preview if an image is selected */}
             {input.imageUrl && (
               <div className="mt-3">
                 <img
@@ -97,8 +98,16 @@ const CreatePostDialog = ({ open, setOpen }) => {
           </div>
 
           <DialogFooter className="my-3">
-            <button type="submit" className="bg-white text-black p-2 rounded-md">
-              Create
+            <button
+              type="submit"
+              className="bg-white text-black p-2 rounded-md flex items-center justify-center"
+              disabled={loading}
+            >
+              {loading ? (
+                <ImSpinner2 className="animate-spin h-5 w-5 mr-2" />
+              ) : (
+                "Create"
+              )}
             </button>
           </DialogFooter>
         </form>

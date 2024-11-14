@@ -9,7 +9,7 @@ import store, { persistor } from './redux/store';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <GoogleOAuthProvider clientId="639324085129-652ktp0cv5ua4c2lt3vefj9n1iamrb9e.apps.googleusercontent.com">
+    <GoogleOAuthProvider clientId="698779511388-tlb24vrlon8ihjtqtr6sv8gjk6pak82n.apps.googleusercontent.com">
       <Provider store={store}>
         <PersistGate loading={null} persistor={persistor}>
           <App />
