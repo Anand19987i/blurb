@@ -62,7 +62,7 @@ const Login = () => {
     const handleGoogleSuccess = async (response) => {
         try {
             dispatch(setLoading(true));
-            const { credential } = response;
+            const { credential } = response;  // This is the Google token
             const res = await axios.post(`${USER_API_END_POINT}/google-login`, { token: credential }, {
                 headers: {
                     "Content-Type": "application/json",
@@ -73,7 +73,7 @@ const Login = () => {
                 dispatch(setToken(res.data.token));
                 localStorage.setItem('user', JSON.stringify(res.data.user));
                 localStorage.setItem('token', res.data.token);
-                console.log("Token Stored:", res.data.token)
+                console.log("Token Stored:", res.data.token);
                 navigate('/');
             }
         } catch (error) {
@@ -82,6 +82,7 @@ const Login = () => {
             dispatch(setLoading(false));
         }
     };
+
 
 
 
@@ -126,7 +127,7 @@ const Login = () => {
 
                     <div className='mt-10 '>
                         <GoogleLogin
-                         clientId="698779511388-tlb24vrlon8ihjtqtr6sv8gjk6pak82n.apps.googleusercontent.com"
+                            clientId="698779511388-tlb24vrlon8ihjtqtr6sv8gjk6pak82n.apps.googleusercontent.com"
                             onSuccess={handleGoogleSuccess}
                             onError={handleGoogleFailure}
                         />
