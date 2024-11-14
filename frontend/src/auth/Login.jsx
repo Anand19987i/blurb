@@ -63,7 +63,7 @@ const Login = () => {
         try {
             dispatch(setLoading(true));
             const { credential } = response;
-            const res = await axios.post(`${USER_API_END_POINT}/auth/google/callback`, { token: credential }, {
+            const res = await axios.post(`${USER_API_END_POINT}/google-login`, { token: credential }, {
                 headers: {
                     "Content-Type": "application/json",
                 },
