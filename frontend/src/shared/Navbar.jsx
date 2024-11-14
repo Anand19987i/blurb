@@ -44,10 +44,17 @@ const Navbar = () => {
     }
   }, [dispatch, user]);
 
-  const logoutHandler = () => {
-    dispatch(setUser(null));
-    navigate("/login");
+  const logoutHandler = async () => {
+    try {
+      await axios.post(`${USER_API_END_POINT}/logout`);
+      localStorage.removeItem('user');
+      dispatch(setUser(null));
+      navigate("/login");
+    } catch (error) {
+      console.error("Error during logout:", error);
+    }
   };
+  
 
   return (
     <div className="bg-gray-900 sticky top-0 z-50">

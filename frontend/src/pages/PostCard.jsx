@@ -45,7 +45,7 @@ const PostCard = ({ post }) => {
 
                 // Create the new comment with user info (name and avatar from the logged-in user)
                 const newComment = {
-                    user: { _id: user.id, name: user.name, avatar: user.avatar }, // Correctly using logged-in user data
+                    user: { _id: user.id, name: user.name, avatar: user?.avatar }, // Correctly using logged-in user data
                     text: commentInput,
                 };
 
@@ -148,10 +148,10 @@ const PostCard = ({ post }) => {
         <div className="bg-slate-900 flex flex-col mx-auto w-full sm:w-3/4 md:w-2/3 lg:w-1/2 xl:w-2/5 my-3 rounded-sm p-4">
             <div className="flex gap-3 items-center p-3">
                 <Avatar className="w-10 h-10 sm:w-12 sm:h-12">
-                    <AvatarImage src={post.userId.avatar || '/default-avatar.png'} />
+                    <AvatarImage src={post?.userId?.avatar || '/default-avatar.png'} />
                 </Avatar>
                 <div className="text-white text-sm sm:text-md">
-                    <p className="font-semibold">{post.userId.name || 'Anonymous'}</p>
+                    <p className="font-semibold">{post?.userId?.name || 'Anonymous'}</p>
                     <span className="text-xs text-gray-300 sm:text-sm">{formattedTime}</span>
                 </div>
             </div>
