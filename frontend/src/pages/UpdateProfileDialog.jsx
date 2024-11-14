@@ -1,8 +1,9 @@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { setUser } from '@/redux/authSlice';
+import { setUser, updateProfile } from '@/redux/authSlice';
+import { fetchUserPosts } from '@/redux/postSlice';
 import { USER_API_END_POINT } from '@/utils/constant';
 import axios from 'axios';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 const UpdateProfileDialog = ({ open, setOpen }) => {
@@ -14,7 +15,19 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
         email: user?.email || ""
     });
     const [avatar, setAvatar] = useState(null);
+    const [avatarPreview, setAvatarPreview] = useState(null);
     const dispatch = useDispatch();
+
+    // Update form state when user data from Redux store changes
+    useEffect(() => {
+        if (user) {
+            setInput({
+                name: user.name || "",
+                email: user.email || ""
+            });
+            setAvatarPreview(user.avatar || null);
+        }
+    }, [user]);
 
     const changeEventHandler = (e) => {
         setInput({ ...input, [e.target.name]: e.target.value });
@@ -24,23 +37,27 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
         const file = e.target.files?.[0];
         if (file) {
             setAvatar(file);
+            const reader = new FileReader();
+            reader.onloadend = () => setAvatarPreview(reader.result);
+            reader.readAsDataURL(file);
         }
     };
+    
 
     const submitHandler = async (e) => {
         e.preventDefault();
         setError(null);
-        
+    
         const formData = new FormData();
         formData.append("name", input.name);
         formData.append("email", input.email);
         if (avatar) {
             formData.append("avatar", avatar);
         }
-
+    
         try {
             setLoading(true);
-            const res = await axios.post(`${USER_API_END_POINT}/profile/${user._id}`, formData, {
+            const res = await axios.put(`${USER_API_END_POINT}/profile/${user.id}`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 },
@@ -59,7 +76,7 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
             setLoading(false);
         }
     };
-
+    
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogContent className="sm:max-w-[425px] bg-slate-950" aria-describedby={undefined} onInteractOutside={() => setOpen(false)}>
@@ -101,6 +118,7 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
                                 accept="image/*" 
                                 className="p-3 rounded-lg outline-none text-slate-900 bg-white cursor-pointer" 
                             />
+                            {avatarPreview && <img src={avatarPreview} alt="Avatar Preview" className="w-48 h-auto rounded-md mx-auto mt-2" />}
                         </div>
                         {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
                     </div>

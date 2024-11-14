@@ -15,13 +15,13 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 const corsOptions = {
-    origin: 'https://blurb-azo3.onrender.com',  // Allow only this origin
+    origin: 'http://localhost:5173',  // Allow only this origin
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true,  // Allow credentials (cookies, etc.)
 };
 
 app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', 'https://blurb-azo3.onrender.com');  // Set exact origin
+    res.header('Access-Control-Allow-Origin', 'http://localhost:5173');  // Set exact origin
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     res.header('Access-Control-Allow-Credentials', 'true');
@@ -38,4 +38,4 @@ app.listen(port, () => {
     connectDB();
     console.log(`Server is listening at ${port}`);
 });
-// https://blurb-azo3.onrender.com
+// http://localhost:5173

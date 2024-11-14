@@ -13,13 +13,14 @@ export const register = async (req, res) => {
     const { name, email, password, confirmPassword } = req.body;
     const file = req.file;
 
-
+    // Error handling for file and password mismatch
     if (!file) {
       return res.status(400).json({
         message: "File is required",
         success: false,
       });
     }
+
     if (password !== confirmPassword) {
       return res.status(400).json({
         message: "Passwords do not match",
@@ -27,6 +28,7 @@ export const register = async (req, res) => {
       });
     }
 
+    // Check if the user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({
@@ -35,9 +37,11 @@ export const register = async (req, res) => {
       });
     }
 
+    // Handle file upload to cloud
     const fileUri = getDataUri(file);
     const cloudResponse = await cloudinary.uploader.upload(fileUri.content);
 
+    // Create the new user
     const newUser = await User.create({
       name,
       email,
@@ -46,12 +50,8 @@ export const register = async (req, res) => {
       avatar: cloudResponse.secure_url,
     });
 
-    setAuthToken(newUser, res);
-
-    return res.status(201).json({
-      message: "User created successfully",
-      success: true,
-    });
+    // Set the auth token and send the response
+    return setAuthToken(newUser, res); // This sends the response, no need to send another one in register
   } catch (error) {
     console.error(error);
     return res.status(500).json({
@@ -60,6 +60,7 @@ export const register = async (req, res) => {
     });
   }
 };
+
 
 export const login = async (req, res) => {
   try {
@@ -148,48 +149,44 @@ export const googleLogin = async (req, res) => {
 
 export const updateProfile = async (req, res) => {
   try {
-    const { name, email } = req.body;
-    const file = req.file;
-    const fileUri = getDataUri(file);
-    const cloudResponse = await cloudinary.uploader.upload(fileUri.content);
+      const userId = req.params.id; // Use userId from URL params
+      const { name, email } = req.body;
+      const file = req.file;
+      console.log("UserId:", userId);  // Log userId
+      console.log("Request Body:", req.body);  // Log request body
+      console.log("File received:", file);  // Log file
 
-    const userId = req.id;
-    let user = await User.findById(userId);
-    setAuthToken(user, res);
+      let user = await User.findById(userId);
+      if (!user) {
+          return res.status(400).json({ message: "User not found." });
+      }
 
-    if (!user) {
-      return res.status(400).json({
-        message: "User not found.",
-        success: false
-      })
-    }
+      if (name) user.name = name;
+      if (email) user.email = email;
 
-    if (name) user.name = name;
-    if (email) user.email = email;
+      if (file) {
+          const fileUri = getDataUri(file);
+          const cloudResponse = await cloudinary.uploader.upload(fileUri.content);
+          console.log("Cloudinary Response:", cloudResponse);  // Check Cloudinary response
+          if (cloudResponse) {
+              user.avatar = cloudResponse.secure_url;
+          }
+      }
 
-    if (cloudResponse) {
-      user.avatar = cloudResponse.secure_url;
-    }
-    await user.save();
-    user = {
-      id: user._id,
-      name: user.name,
-      email: user.email,
-      avatar: user.avatar
-    }
-    return res.status(200).json({
-      message: "Profile update successfully",
-      success: true,
-    })
+      await user.save();
+
+      return res.status(200).json({
+          message: "Profile updated successfully",
+          success: true,
+      });
+  } catch (error) {
+      console.error("Error during profile update:", error);
+      return res.status(500).json({
+          message: "Internal Server error",
+          success: false
+      });
   }
-  catch (error) {
-    console.log(error);
-    return res.status(500).json({
-      message: "Internal Server error",
-      success: false
-    });
-  }
-}
+};
 
 export const search = async (req, res) => {
   const { query } = req.query;

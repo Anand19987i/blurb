@@ -10,7 +10,7 @@ router.route("/register").post(singleUpload, register);
 router.route("/login").post(login);
 router.route("/logout").post(logout);
 router.route("/google-login").post(singleUpload, googleLogin);
-router.route("/profile/:id").post(singleUpload, updateProfile);
+router.route("/profile/:id").put(singleUpload, updateProfile);
 router.route("/search").get(search);
 router.route("/search/profile/:id").get(getProfile);
 

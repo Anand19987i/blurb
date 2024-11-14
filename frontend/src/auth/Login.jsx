@@ -6,35 +6,41 @@ import { USER_API_END_POINT } from '@/utils/constant';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import store from '@/redux/store';
-import { setLoading, setToken, setUser } from '@/redux/authSlice';
 import { useDispatch, useSelector } from 'react-redux';
+import { setLoading, setToken, setUser } from '@/redux/authSlice';
 
 const Login = () => {
     const [input, setInput] = useState({
         email: "",
         password: "",
     });
-    const { loading, user, token } = useSelector(store => store.auth);
+    const [errorMessage, setErrorMessage] = useState("");  // State for error message
+    const { loading, user } = useSelector(store => store.auth); // Only use loading and user from state
+
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+
+    // Reset loading state when component mounts
+    useEffect(() => {
+        dispatch(setLoading(false));
+    }, [dispatch]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setInput({ ...input, [name]: value });
     };
 
-    const navigate = useNavigate();
-    const dispatch = useDispatch();
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            dispatch(setLoading(true));
+            dispatch(setLoading(true)); // Set loading state to true when submitting the form
             const res = await axios.post(`${USER_API_END_POINT}/login`, input, {
                 headers: {
                     "Content-Type": "application/json",
                 },
                 withCredentials: true,
             });
+
             console.log('Login Response:', res.data); // Log the entire response
 
             if (res.data.success) {
@@ -47,17 +53,22 @@ const Login = () => {
             }
         } catch (error) {
             console.log(error);
+            // Check if the server returned a message in the error response
+            if (error.response && error.response.data && error.response.data.message) {
+                setErrorMessage(error.response.data.message); // Set the error message from server
+            } else {
+                setErrorMessage("An error occurred. Please try again.");
+            }
         } finally {
-            dispatch(setLoading(false));
+            dispatch(setLoading(false)); // Reset loading state after the request finishes
         }
     };
 
-
     useEffect(() => {
         if (user) {
-            navigate("/");
+            navigate("/"); // Redirect to home if the user is already logged in
         }
-    }, [])
+    }, [user, navigate]);
 
     const handleGoogleSuccess = async (response) => {
         try {
@@ -85,9 +96,6 @@ const Login = () => {
             dispatch(setLoading(false));
         }
     };
-
-
-
 
     const handleGoogleFailure = (error) => {
         console.error('Google Sign-In was unsuccessful', error);
@@ -121,14 +129,24 @@ const Login = () => {
                         required
                         className="my-3"
                     />
-                    <Button type="submit" variant="default" className="mt-4 p-5 bg-white mx-auto text-slate-900 hover:bg-gray-200">Login</Button>
+                    {/* Display error message if there is one */}
+                    {errorMessage && (
+                        <p className="text-red-500 mt-2">{errorMessage}</p>
+                    )}
+                    <Button type="submit" variant="default" className="mt-4 p-5 bg-white mx-auto text-slate-900 hover:bg-whitw">
+                        {loading ? (
+                            <div className="spinner border-t-4 border-gray-300 border-solid w-3 h-3 rounded-full"></div>
+                        ) : (
+                            "Login"
+                        )}
+                    </Button>
                     <div className="flex items-center justify-center mt-10">
                         <hr className="flex-1 border-slate-300" />
                         <p className="text-slate-500 mx-4">Or Sign in with Google</p>
                         <hr className="flex-1 border-slate-300" />
                     </div>
 
-                    <div className='mt-10 '>
+                    <div className='mt-10'>
                         <GoogleLogin
                             onSuccess={handleGoogleSuccess}
                             onError={handleGoogleFailure}
@@ -147,7 +165,6 @@ const Login = () => {
                     Join us today to explore a wealth of information and engage with a vibrant community!
                 </p>
             </div>
-
         </div>
     );
 };
