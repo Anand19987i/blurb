@@ -70,23 +70,23 @@ const Signup = () => {
         </div>
         <div className="flex flex-col text-white">
           <label>Name<span className="text-amber-500"> *</span></label>
-          <input type="text" placeholder="enter your name" onChange={changeHandler} name="name" value={input.name} className="p-3 rounded-lg outline-none text-black" />
+          <input required type="text" placeholder="enter your name" onChange={changeHandler} name="name" value={input.name} className="p-3 rounded-lg outline-none text-black" />
         </div>
         <div className="flex flex-col text-white">
           <label>Email<span className="text-amber-500"> *</span></label>
-          <input type="email" placeholder="enter your valid email" onChange={changeHandler} name='email' value={input.email} className="p-3 rounded-lg outline-none text-black" />
+          <input required type="email" placeholder="enter your valid email" onChange={changeHandler} name='email' value={input.email} className="p-3 rounded-lg outline-none text-black" />
         </div>
         <div className="flex flex-col text-white">
           <label>Password<span className="text-amber-500"> *</span></label>
-          <input type="password" placeholder="enter your password" onChange={changeHandler} name='password' value={input.password} className="p-3 rounded-lg outline-none text-black" />
+          <input required type="password" placeholder="enter your password" onChange={changeHandler} name='password' value={input.password} className="p-3 rounded-lg outline-none text-black" />
         </div>
         <div className="flex flex-col text-white">
           <label>Confirm Password<span className="text-amber-500"> *</span></label>
-          <input type="password" placeholder="Re-enter your password" onChange={changeHandler} name='confirmPassword' value={input.confirmPassword} className="p-3 rounded-lg outline-none text-black" />
+          <input required type="password" placeholder="Re-enter your password" onChange={changeHandler} name='confirmPassword' value={input.confirmPassword} className="p-3 rounded-lg outline-none text-black" />
         </div>
         <div className="flex flex-col text-white">
           <label>Profile Image<span className="text-amber-500"> *</span></label>
-          <input type="file" onChange={fileHandler} name='avatar' accept="image/*" className="p-3 rounded-lg outline-none text-slate-900 bg-white cursor-pointer" />
+          <input required type="file" onChange={fileHandler} name='avatar' accept="image/*" className="p-3 rounded-lg outline-none text-slate-900 bg-white cursor-pointer" />
         </div>
         <div>
           <span className='text-gray-400'>Already have a account ? <Link to="/login" className='text-blue-400'>Login</Link></span>
