@@ -15,7 +15,7 @@ const PostFeed = () => {
     }, [dispatch]);
     
 
-    if (loading) return  <div className="spinner animate-spin border-t-4 border-gray-300 border-solid w-3 h-3 rounded-full mx-auto"></div>
+    if (loading) return  <div className="spinner animate-spin border-t-4 border-gray-300 border-solid w-4 h-4 rounded-full mx-auto my-4"></div>
     if (error) return <p className='text-gray-500 text-center'>{error}</p>;
 
     const postList = Array.isArray(feedPosts) ? feedPosts : [];
