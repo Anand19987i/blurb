@@ -140,7 +140,7 @@ const PostCard = ({ post }) => {
                 </Avatar>
                 <div className="text-white text-md sm:text-md">
                     <p className="font-semibold">{post?.userId?.name || 'Anonymous'}</p>
-                    <span className="text-xs text-gray-300 sm:text-sm">{formattedTime}</span>
+                    <span className="text-xs text-gray-300 sm:text-md">{formattedTime}</span>
                 </div>
             </div>
 
