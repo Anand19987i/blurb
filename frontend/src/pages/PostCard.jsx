@@ -22,9 +22,14 @@ const PostCard = ({ post }) => {
             setLiked(post.likes.includes(user.id));
         }
     }, [post.likes, user]);
-    
-    
 
+
+    useEffect(() => {
+        // Update the comments state whenever post.comments changes
+        if (post.comments) {
+            setComments(post.comments);
+        }
+    }, [post.comments]);
 
     const handleCommentClick = () => {
         setShowComments(!showComments);
@@ -45,7 +50,7 @@ const PostCard = ({ post }) => {
 
                 // Create the new comment with user info (name and avatar from the logged-in user)
                 const newComment = {
-                    user: { _id: user.id, name: user.name, avatar: user?.avatar }, // Correctly using logged-in user data
+                    user: { _id: user.id, name: user.name, avatar: user.avatar }, // Correctly using logged-in user data
                     text: commentInput,
                 };
 
@@ -60,11 +65,10 @@ const PostCard = ({ post }) => {
                         headers: {
                             Authorization: `Bearer ${token}`,
                         },
-                        withCredentials: true,
                     }
                 );
 
-                // In case the server response is different or needs to be corrected, update the state with the server response
+                // Update comments with the latest response data from the server
                 setComments(response.data.comments);
                 setCommentInput('');  // Clear the input field
 
@@ -73,9 +77,6 @@ const PostCard = ({ post }) => {
             }
         }
     };
-
-
-
 
     const handleLikeClick = async () => {
         const token = localStorage.getItem('auth_token');
@@ -112,7 +113,7 @@ const PostCard = ({ post }) => {
             const response = await axios.post(
                 `${POST_API_END_POINT}/posts/${post._id}/like`,
                 { userId: user.id },
-                { headers: { Authorization: `Bearer ${token}` }, withCredentials:true }
+                { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
             );
             setLikesCount(response.data.post.likes.length);
             setLiked(false);
@@ -215,17 +216,24 @@ const PostCard = ({ post }) => {
                             <h3 className="text-white text-lg">Comments</h3>
                             {comments.map((comment) => (
                                 <div key={comment._id} className="flex items-start gap-2 mt-2">
+                                    {/* Check if the user data is available */}
                                     <Avatar className="w-6 h-6">
-                                        <AvatarImage src={comment.user?.avatar || '/default-avatar.png'} />
+                                        <AvatarImage
+                                            src={comment.user ? comment.user.avatar || '/default-avatar.png' : '/default-avatar.png'}
+                                            alt={comment.user ? comment.user.name : 'Anonymous'}
+                                        />
                                     </Avatar>
                                     <div className="flex flex-col">
-                                        <p className="text-sm text-white font-semibold">{comment.user?.name}</p>
+                                        <p className="text-sm text-white font-semibold">
+                                            {comment.user ? comment.user.name : 'Anonymous'}
+                                        </p>
                                         <p className="text-xs text-gray-300">{comment.text}</p>
                                     </div>
                                 </div>
                             ))}
                         </div>
                     )}
+
                 </div>
             )}
         </div>

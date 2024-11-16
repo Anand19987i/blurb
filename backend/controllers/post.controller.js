@@ -1,21 +1,23 @@
 import { Post } from "../models/post.model.js";
-import jwt from 'jsonwebtoken';
-import mongoose from 'mongoose';
 import cloudinary from "../config/cloudinary.js";
 import getDataUri from "../config/datauri.js";
 import { setAuthToken } from "../config/tokenUtils.js";
 import { User } from "../models/user.model.js";
+import { Notification } from "../models/notification.model.js";
+
 
 export const createPost = async (req, res) => {
     try {
         const { content, userId } = req.body;
         const file = req.file;
+
         if (!content || !userId) {
             return res.status(400).json({
                 message: "Content and user ID are required.",
                 success: false,
             });
         }
+
         let imageUrl = null;
         if (file) {
             try {
@@ -30,12 +32,30 @@ export const createPost = async (req, res) => {
                 });
             }
         }
-        
+
+        // Find the user to get their name
+        const user = await User.findById(userId).select('name');
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found.",
+                success: false,
+            });
+        }
+
         const newPost = await Post.create({
             userId,
             content,
             imageUrl,
         });
+
+        // Create notifications for all users
+        const allUsers = await User.find({}, '_id');
+        const notificationMessage = `New post by ${user.name}`;
+        const notification = new Notification({
+            message: notificationMessage,
+            recipients: allUsers.map(user => user._id),
+        });
+        await notification.save();
 
         return res.status(201).json({
             message: "Post created successfully",
@@ -108,10 +128,10 @@ export const addComment = async (req, res) => {
 }
 
 export const getCommentsForPost = async (req, res) => {
-    const { postId } = req.params;
+    const { postId } = req.params;``
 
     try {
-        const comments = await Comment.find({ postId })
+        const comments = await Post.find({ postId })
             .populate('userId', 'name avatar')
             .sort({ createdAt: -1 });  
 
@@ -184,3 +204,5 @@ export const getUserPosts = async (req, res) => {
         });
     }
 };
+
+

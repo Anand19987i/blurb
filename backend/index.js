@@ -5,7 +5,10 @@ import connectDB from "./config/db.js";
 import cors from "cors";
 import userRoute from "./routes/user.route.js";
 import postRoute from "./routes/post.route.js";
+import notificationRoute from "./routes/notification.route.js";
 import isAuthenticated from "./middlewares/isAuthenticated.js";
+import { createServer } from "http";
+import { Server } from "socket.io";
 
 dotenv.config({});
 const app = express();
@@ -15,27 +18,49 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 const corsOptions = {
-    origin: 'https://blurb-azo3.onrender.com',  // Allow only this origin
+    origin: ['http://localhost:5173', 'https://blurb-azo3.onrender.com'], // Allow frontend origins
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    credentials: true,  // Allow credentials (cookies, etc.)
+    credentials: true, // Allow cookies
 };
 
-app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', 'https://blurb-azo3.onrender.com');  // Set exact origin
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    res.header('Access-Control-Allow-Credentials', 'true');
-    next();
-});
-
-
 app.use(cors(corsOptions));
+
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/post", postRoute);
+app.use("/api/v1/notification", notificationRoute);
 
 const port = process.env.PORT || 4000;
-app.listen(port, () => {
-    connectDB();
-    console.log(`Server is listening at ${port}`);
+
+// Create HTTP server
+const server = createServer(app);
+
+// Initialize Socket.IO
+const io = new Server(server, {
+    cors: {
+        origin: ['http://localhost:5173', 'https://blurb-azo3.onrender.com'],
+        methods: ['GET', 'POST'],
+    },
 });
-// https://blurb-azo3.onrender.com
+
+// Socket.IO Logic
+io.on("connection", (socket) => {
+    console.log("New client connected:", socket.id);
+
+    // Example event
+    socket.on("sendNotification", (data) => {
+        console.log("Notification data:", data);
+        // Emit notification to all connected clients
+        io.emit("receiveNotification", data);
+    });
+
+    // Handle disconnection
+    socket.on("disconnect", () => {
+        console.log("Client disconnected:", socket.id);
+    });
+});
+
+// Start the server
+server.listen(port, () => {
+    connectDB();
+    console.log(`Server is listening at port ${port}`);
+});

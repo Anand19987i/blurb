@@ -22,9 +22,13 @@ const PostCard = ({ post }) => {
         setComments(post.comments || []);
     }, [post]);
 
-
-
-
+    useEffect(() => {
+        // Update the comments state whenever post.comments changes
+        if (post.comments) {
+            setComments(post.comments);
+        }
+    }, [post.comments]);
+    
 
     const handleCommentClick = () => {
         setShowComments(!showComments);

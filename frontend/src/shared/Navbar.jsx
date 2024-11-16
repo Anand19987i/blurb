@@ -5,19 +5,41 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage } from '@/components/ui/avatar';
 import { AiFillHome } from "react-icons/ai";
-import { IoSearch, IoMenu } from "react-icons/io5";
+import { IoSearch } from "react-icons/io5";
 import { LogOut, User2 } from 'lucide-react';
 import axios from 'axios';
-import { USER_API_END_POINT } from '@/utils/constant';
+import { USER_API_END_POINT, NOTIFICATION_API_END_POINT } from '@/utils/constant';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { IoMdNotifications } from "react-icons/io";
+import { FaBell } from 'react-icons/fa';
+import { BiSolidBell, BiSolidHome } from "react-icons/bi";
 
 const Navbar = () => {
   const { user } = useSelector((store) => store.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchInputVisible, setSearchInputVisible] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  // Fetch notifications and update unread count
+  useEffect(() => {
+    if (user) {
+      const fetchNotifications = async () => {
+        try {
+          const response = await axios.get(`${NOTIFICATION_API_END_POINT}/b/notifications/${user.id}`, { withCredentials: true });
+          setNotifications(response.data.notifications);
+          const unreadNotifications = response.data.notifications.filter(n => !n.isRead);
+          setUnreadCount(unreadNotifications.length);
+        } catch (error) {
+          console.error("Error fetching notifications:", error);
+        }
+      };
+      fetchNotifications();
+    }
+  }, [user]);
 
   const handleSearchChange = async (e) => {
     const query = e.target.value;
@@ -54,140 +76,100 @@ const Navbar = () => {
       console.error("Error during logout:", error);
     }
   };
-  
 
   return (
     <div className="bg-gray-900 sticky top-0 z-50">
       <div className="flex items-center justify-between mx-auto max-w-7xl h-16 px-4 sm:px-6 lg:px-8">
+        {/* Logo */}
         <Link to="/" className="text-2xl font-bold text-white">Blurb</Link>
 
-        <button
-          className="text-white sm:hidden focus:outline-none"
-          onClick={() => setMenuOpen(!menuOpen)}
-        >
-          <IoMenu className="h-8 w-8" />
-        </button>
-
-        <div className="hidden sm:flex items-center gap-10">
-          <Link to="/"><AiFillHome className="h-8 w-8 text-white" /></Link>
-          <div className="flex items-center bg-gray-950 px-3 rounded-lg relative">
-            <IoSearch className="h-6 w-6 text-white" />
-            <input
-              className="bg-gray-950 p-2 text-white outline-none"
-              placeholder="Search"
-              value={searchQuery}
-              onChange={handleSearchChange}
-            />
-            {searchResults.length > 0 && (
-              <div className="absolute top-full left-0 mt-2 bg-gray-800 p-4 w-full max-h-60 overflow-y-auto rounded-md shadow-lg z-100">
-                {searchResults.map(result => (
-                  <Link to={`/search/profile/${result._id}`} key={result._id} className="flex items-center p-2 hover:bg-gray-700 cursor-pointer">
-                    <Avatar className="mr-3">
-                      <AvatarImage src={result.avatar || '/default-avatar.png'} />
-                    </Avatar>
-                    <p className="text-white">{result.name}</p>
-                  </Link>
-                ))}
+        {/* Search */}
+        {/* Search */}
+        <div className="relative flex justify-center items-center">
+          <IoSearch
+            className="h-8 w-8 text-white cursor-pointer"
+            onClick={() => setSearchInputVisible((prev) => !prev)}
+          />
+          {searchInputVisible && (
+            <div className="absolute top-12 transform -translate-x-1/2 left-1/2 bg-gray-800 p-3 rounded-lg shadow-lg w-60 sm:w-80">
+              <div className="flex items-center bg-gray-900 px-3 py-2 rounded-lg">
+                <IoSearch className="h-6 w-6 text-gray-400" />
+                <input
+                  className="bg-transparent p-2 text-white outline-none w-full"
+                  placeholder="Search"
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                />
               </div>
-            )}
+              {searchResults.length > 0 && (
+                <div className="mt-2 max-h-60 overflow-y-auto">
+                  {searchResults.map((result) => (
+                    <Link
+                      to={`/search/profile/${result._id}`}
+                      key={result._id}
+                      className="flex items-center p-2 hover:bg-gray-700 rounded-lg cursor-pointer"
+                    >
+                      <Avatar className="mr-3">
+                        <AvatarImage src={result.avatar || '/default-avatar.png'} />
+                      </Avatar>
+                      <p className="text-white">{result.name}</p>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+
+        {/* Icons */}
+        <div className="flex items-center justify-center gap-6">
+          <div className='flex gap-5 '>
+            <Link to="/"><BiSolidHome className="h-8 w-8 text-white" /></Link>
+            <Link to={`/b/notifications/${user?.id}`} onClick={() => setUnreadCount(0)}>
+              <button className="relative">
+                <BiSolidBell className="h-8 w-8 text-white cursor-pointer" />
+                {unreadCount > 0 && (
+                  <span className="absolute top-0 right-0 w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full flex items-center justify-center">
+                    {unreadCount}
+                  </span>
+                )}
+              </button>
+            </Link>
           </div>
-          {user ? (
+          {user && (
             <Popover>
               <PopoverTrigger asChild>
                 <Avatar className="cursor-pointer">
                   <AvatarImage src={user.avatar || '/default-avatar.png'} />
                 </Avatar>
               </PopoverTrigger>
-              <PopoverContent className='bg-slate-950 border-gray-900'>
-                <div className='flex gap-4'>
-                  <Avatar className="cursor-pointer">
+              <PopoverContent className="bg-gray-900 border-gray-800">
+                <div className="flex gap-4">
+                  <Avatar>
                     <AvatarImage src={user.avatar || '/default-avatar.png'} />
                   </Avatar>
                   <div>
-                    <p className='text-white font-semibold'>{user.name}</p>
-                    <p className='text-gray-300 text-sm'>{user.email}</p>
+                    <p className="text-white font-semibold">{user.name}</p>
+                    <p className="text-gray-300 text-sm">{user.email}</p>
                   </div>
                 </div>
-                <div className='flex gap-4'>
-                  <div className='text-white flex my-4 gap-1'>
-                    <User2/>
-                    <Link to={`/profile/${user.id}`}><button className='text-white outline-none bg-none'>View Profile</button></Link>
+                <div className="flex gap-4">
+                  <div className="text-white flex my-4 gap-1">
+                    <User2 />
+                    <Link to={`/profile/${user.id}`}>
+                      <button className="text-white outline-none bg-none">View Profile</button>
+                    </Link>
                   </div>
-                  <div className='text-white flex my-4 gap-1'>
-                    <LogOut/>
-                    <button onClick={() => logoutHandler()} className='text-white outline-none bg-none'>Logout</button>
+                  <div className="text-white flex my-4 gap-1">
+                    <LogOut />
+                    <button onClick={() => logoutHandler()} className="text-white outline-none bg-none">Logout</button>
                   </div>
                 </div>
               </PopoverContent>
             </Popover>
-          ) : (
-            <div className="flex gap-2 mx-auto">
-              <Link to="/login">
-                <Button variant="outline" className="hidden sm:block">Login</Button>
-              </Link>
-              <Link to="/register">
-                <Button className="hidden sm:block bg-gray-800">Signup</Button>
-              </Link>
-            </div>
           )}
         </div>
-
-        {menuOpen && (
-          <div className="absolute top-16 left-0 w-full bg-gray-900 p-4 flex flex-col gap-5 sm:hidden">
-            <div className="flex items-center bg-gray-800 px-3 rounded-lg">
-              <IoSearch className="h-6 w-6 text-white" />
-              <input
-                className="bg-gray-800 p-2 text-white outline-none w-full"
-                placeholder="Search"
-                value={searchQuery}
-                onChange={handleSearchChange}
-              />
-            </div>
-            {searchResults.length > 0 && (
-              <div className="bg-gray-800 p-4 rounded-md shadow-lg max-h-60 overflow-y-auto">
-                {searchResults.map(result => (
-                  <Link to={`/search/profile/${result._id}`} key={result._id} className="flex items-center p-2 hover:bg-gray-700 cursor-pointer">
-                    <Avatar className="mr-3">
-                      <AvatarImage src={result.avatar || '/default-avatar.png'} />
-                    </Avatar>
-                    <p className="text-white">{result.name}</p>
-                  </Link>
-                ))}
-              </div>
-            )}
-            <Link to="/" className="text-white flex mx-auto items-center gap-2" onClick={() => setMenuOpen(false)}>
-              <AiFillHome className="h-6 w-6" /> Home
-            </Link>
-            {user ? (
-              <>
-                <Link to={`/profile/${user.id}`} className="text-white mx-auto flex items-center gap-2" onClick={() => setMenuOpen(false)}>
-                  <Avatar className="mr-3">
-                    <AvatarImage src={user.avatar || '/default-avatar.png'} />
-                  </Avatar>
-                  View Profile
-                </Link>
-                <button
-                  className="text-white flex items-center mx-auto gap-2"
-                  onClick={() => {
-                    logoutHandler();
-                    setMenuOpen(false);
-                  }}
-                >
-                  <LogOut className="h-6 w-6" /> Logout
-                </button>
-              </>
-            ) : (
-              <div className="flex gap-4">
-                <Link to="/login">
-                  <Button variant="outline" className="text-black mx-auto">Login</Button>
-                </Link>
-                <Link to="/register">
-                  <Button className="bg-gray-800 text-white mx-auto">Signup</Button>
-                </Link>
-              </div>
-            )}
-          </div>
-        )}
       </div>
     </div>
   );

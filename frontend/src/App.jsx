@@ -6,7 +6,10 @@ import Login from './auth/Login'
 import ViewProfile from './pages/ViewProfile'
 import SearchUserProfile from './pages/SearchUserProfile'
 
+import Notification from './pages/Notification'
+
 const App = () => {
+  const userId = localStorage.getItem('userId');
   const appRouter = createBrowserRouter([
     {
       path: '/',
@@ -27,6 +30,11 @@ const App = () => {
     {
       path: '/search/profile/:id',
       element: <SearchUserProfile />
+    },
+    {
+      path: '/b/notifications/:id',
+      element: <Notification />
+
     }
   ])
 
