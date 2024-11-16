@@ -4,39 +4,34 @@ import { Avatar, AvatarImage } from '@/components/ui/avatar';
 import { useDispatch, useSelector } from 'react-redux';
 import moment from 'moment';
 import axios from 'axios';
+import DOMPurify from 'dompurify'; // Ensure you install it: npm install dompurify
 import { POST_API_END_POINT } from '../utils/constant';
 
 const PostCard = ({ post }) => {
     const dispatch = useDispatch();
     const { user } = useSelector(store => store.auth);
-    const [showComments, setShowComments] = useState(false);
     const [liked, setLiked] = useState(post.likes?.includes(user?.id) || false);
+    const [showComments, setShowComments] = useState(false);
     const [comments, setComments] = useState(post.comments || []);
-    const [likesCount, setLikesCount] = useState(post.likes ? post.likes.length : 0);
     const [commentInput, setCommentInput] = useState('');
     const [isContentExpanded, setIsContentExpanded] = useState(false);
-
-
-    useEffect(() => {
-        setLikesCount(post.likes?.length || 0);
-        setComments(post.comments || []);
-    }, [post]);
+    const [likesCount, setLikesCount] = useState(post.likes ? post.likes.length : 0);
 
     useEffect(() => {
-        // Update the comments state whenever post.comments changes
+        if (post.likes && user) {
+            setLiked(post.likes.includes(user.id));
+        }
+    }, [post.likes, user]);
+
+    useEffect(() => {
         if (post.comments) {
             setComments(post.comments);
         }
     }, [post.comments]);
-    
 
-    const handleCommentClick = () => {
-        setShowComments(!showComments);
-    };
+    const handleCommentClick = () => setShowComments(!showComments);
 
-    const handleCommentInputChange = (e) => {
-        setCommentInput(e.target.value);
-    };
+    const handleCommentInputChange = (e) => setCommentInput(e.target.value);
 
     const handleAddComment = async () => {
         if (commentInput.trim()) {
@@ -46,39 +41,27 @@ const PostCard = ({ post }) => {
                     console.error('No token found');
                     return;
                 }
-    
-                // Create the new comment with user info (name and avatar from the logged-in user)
+
                 const newComment = {
-                    user: { _id: user.id, name: user.name, avatar: user.avatar }, // Correctly using logged-in user data
+                    user: { _id: user.id, name: user.name, avatar: user.avatar },
                     text: commentInput,
                 };
-    
-                // Optimistically update the UI by adding the new comment
+
                 setComments((prevComments) => [...prevComments, newComment]);
-    
-                // Send the comment to the server
+
                 const response = await axios.post(
                     `${POST_API_END_POINT}/posts/${post._id}/comment`,
                     { userId: user.id, text: commentInput },
-                    {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                        },
-                    }
+                    { headers: { Authorization: `Bearer ${token}` } }
                 );
-    
-                // Update comments with the latest response data from the server
+
                 setComments(response.data.comments);
-                setCommentInput('');  // Clear the input field
-    
+                setCommentInput('');
             } catch (error) {
                 console.error("Error adding comment:", error);
             }
         }
     };
-    
-
-
 
     const handleLikeClick = async () => {
         const token = localStorage.getItem('auth_token');
@@ -125,7 +108,6 @@ const PostCard = ({ post }) => {
             setLiked(true);
         }
     };
-
     const handleShareClick = () => {
         if (navigator.share) {
             navigator.share({
@@ -137,41 +119,48 @@ const PostCard = ({ post }) => {
         } else {
             console.log('Share not supported on this browser.');
         }
-    }
-const formattedTime = moment(post.createdAt).fromNow();
-
-
-    const handleReadMoreToggle = () => {
-        setIsContentExpanded(!isContentExpanded);
     };
 
-    const truncatedContent = post.content.length > 200 ? post.content.slice(0, 200) + '...' : post.content;
+    const handleReadMoreToggle = () => setIsContentExpanded(!isContentExpanded);
+
+    const sanitizedContent = DOMPurify.sanitize(post.content);
+
+    const previewContent = (content) => {
+        const truncated = content.length > 200 ? content.slice(0, 200) + '...' : content;
+        return DOMPurify.sanitize(truncated);
+    };
+
+    const formattedTime = moment(post.createdAt).fromNow();
 
     return (
         <div className="bg-slate-900 flex flex-col mx-auto w-full sm:w-3/4 md:w-2/3 lg:w-1/2 xl:w-2/5 my-3 rounded-sm p-4">
             <div className="flex gap-3 items-center p-3">
                 <Avatar className="w-10 h-10 sm:w-12 sm:h-12">
-                    <AvatarImage src={post.userId.avatar || '/default-avatar.png'} />
+                    <AvatarImage src={post?.userId?.avatar || '/default-avatar.png'} />
                 </Avatar>
                 <div className="text-white text-sm sm:text-md">
-                    <p className="font-semibold">{post.userId.name || 'Anonymous'}</p>
+                    <p className="font-semibold">{post?.userId?.name || 'Anonymous'}</p>
                     <span className="text-xs text-gray-300 sm:text-sm">{formattedTime}</span>
                 </div>
             </div>
-
-            <div className="text-white px-3 text-justify text-sm sm:text-base md:px-4">
-                <p>
-                    {isContentExpanded ? post.content : truncatedContent}
-                    {post.content.length > 200 && (
-                        <button
-                            onClick={handleReadMoreToggle}
-                            className="text-blue-400 text-sm ml-2"
-                        >
-                            {isContentExpanded ? 'Read Less' : 'Read More'}
-                        </button>
-                    )}
-                </p>
+            <div className="text-white px-3 text-sm sm:text-base md:px-4 items-center">
+                <span
+                    dangerouslySetInnerHTML={{
+                        __html: isContentExpanded
+                            ? sanitizedContent
+                            : previewContent(sanitizedContent),
+                    }}
+                />
+                {post.content.length > 200 && (
+                    <button
+                        onClick={handleReadMoreToggle}
+                        className="text-blue-400 text-sm ml-2"
+                    >
+                        {isContentExpanded ? 'Read Less' : 'Read More'}
+                    </button>
+                )}
             </div>
+
 
             {post.imageUrl && (
                 <div className="my-2">
@@ -218,7 +207,6 @@ const formattedTime = moment(post.createdAt).fromNow();
                             <h3 className="text-white text-lg">Comments</h3>
                             {comments.map((comment) => (
                                 <div key={comment._id} className="flex items-start gap-2 mt-2">
-                                    {/* Check if the user data is available */}
                                     <Avatar className="w-6 h-6">
                                         <AvatarImage
                                             src={comment.user ? comment.user.avatar || '/default-avatar.png' : '/default-avatar.png'}
@@ -235,7 +223,6 @@ const formattedTime = moment(post.createdAt).fromNow();
                             ))}
                         </div>
                     )}
-
                 </div>
             )}
         </div>

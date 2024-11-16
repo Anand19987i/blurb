@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { MdThumbUp, MdOutlineThumbUp, MdComment, MdShare } from 'react-icons/md';
 import { Avatar, AvatarImage } from '@/components/ui/avatar';
 import { useDispatch, useSelector } from 'react-redux';
 import moment from 'moment';
 import axios from 'axios';
+import DOMPurify from 'dompurify'; // Ensure you install it: npm install dompurify
 import { POST_API_END_POINT } from '../utils/constant';
 
 const PostCard = ({ post }) => {
@@ -16,28 +17,21 @@ const PostCard = ({ post }) => {
     const [isContentExpanded, setIsContentExpanded] = useState(false);
     const [likesCount, setLikesCount] = useState(post.likes ? post.likes.length : 0);
 
-
     useEffect(() => {
         if (post.likes && user) {
             setLiked(post.likes.includes(user.id));
         }
     }, [post.likes, user]);
 
-
     useEffect(() => {
-        // Update the comments state whenever post.comments changes
         if (post.comments) {
             setComments(post.comments);
         }
     }, [post.comments]);
 
-    const handleCommentClick = () => {
-        setShowComments(!showComments);
-    };
+    const handleCommentClick = () => setShowComments(!showComments);
 
-    const handleCommentInputChange = (e) => {
-        setCommentInput(e.target.value);
-    };
+    const handleCommentInputChange = (e) => setCommentInput(e.target.value);
 
     const handleAddComment = async () => {
         if (commentInput.trim()) {
@@ -48,36 +42,26 @@ const PostCard = ({ post }) => {
                     return;
                 }
 
-                // Create the new comment with user info (name and avatar from the logged-in user)
                 const newComment = {
-                    user: { _id: user.id, name: user.name, avatar: user.avatar }, // Correctly using logged-in user data
+                    user: { _id: user.id, name: user.name, avatar: user.avatar },
                     text: commentInput,
                 };
 
-                // Optimistically update the UI by adding the new comment
                 setComments((prevComments) => [...prevComments, newComment]);
 
-                // Send the comment to the server
                 const response = await axios.post(
                     `${POST_API_END_POINT}/posts/${post._id}/comment`,
                     { userId: user.id, text: commentInput },
-                    {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                        },
-                    }
+                    { headers: { Authorization: `Bearer ${token}` } }
                 );
 
-                // Update comments with the latest response data from the server
                 setComments(response.data.comments);
-                setCommentInput('');  // Clear the input field
-
+                setCommentInput('');
             } catch (error) {
                 console.error("Error adding comment:", error);
             }
         }
     };
-
     const handleLikeClick = async () => {
         const token = localStorage.getItem('auth_token');
         if (!token) {
@@ -91,7 +75,6 @@ const PostCard = ({ post }) => {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
-                withCredentials: true,
             });
         } catch (error) {
             console.error('Error liking post:', error);
@@ -99,6 +82,7 @@ const PostCard = ({ post }) => {
             setLiked(false);
         }
     };
+
 
     const handleUnlikeClick = async () => {
         const token = localStorage.getItem('auth_token');
@@ -113,7 +97,7 @@ const PostCard = ({ post }) => {
             const response = await axios.post(
                 `${POST_API_END_POINT}/posts/${post._id}/like`,
                 { userId: user.id },
-                { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
+                { headers: { Authorization: `Bearer ${token}` } }
             );
             setLikesCount(response.data.post.likes.length);
             setLiked(false);
@@ -123,7 +107,6 @@ const PostCard = ({ post }) => {
             setLiked(true);
         }
     };
-
     const handleShareClick = () => {
         if (navigator.share) {
             navigator.share({
@@ -137,13 +120,17 @@ const PostCard = ({ post }) => {
         }
     };
 
-    const formattedTime = moment(post.createdAt).fromNow();
+    const handleReadMoreToggle = () => setIsContentExpanded(!isContentExpanded);
 
-    const handleReadMoreToggle = () => {
-        setIsContentExpanded(!isContentExpanded);
+    const sanitizedContent = DOMPurify.sanitize(post.content);
+
+    const previewContent = (content) => {
+        const truncated = content.length > 200 ? content.slice(0, 200) + '...' : content;
+        return DOMPurify.sanitize(truncated);
     };
 
-    const truncatedContent = post.content.length > 200 ? post.content.slice(0, 200) + '...' : post.content;
+    const formattedTime = moment(post.createdAt).fromNow();
+    const contentRef = useRef(null);
 
     return (
         <div className="bg-slate-900 flex flex-col mx-auto w-full sm:w-3/4 md:w-2/3 lg:w-1/2 xl:w-2/5 my-3 rounded-sm p-4">
@@ -157,18 +144,22 @@ const PostCard = ({ post }) => {
                 </div>
             </div>
 
-            <div className="text-white px-3 text-sm sm:text-base md:px-4">
-                <p>
-                    {isContentExpanded ? post.content : truncatedContent}
-                    {post.content.length > 200 && (
-                        <button
-                            onClick={handleReadMoreToggle}
-                            className="text-blue-400 text-sm ml-2"
-                        >
-                            {isContentExpanded ? 'Read Less' : 'Read More'}
-                        </button>
-                    )}
-                </p>
+            <div className="text-white px-3 text-sm sm:text-base md:px-4 items-center">
+                <span
+                    dangerouslySetInnerHTML={{
+                        __html: isContentExpanded
+                            ? sanitizedContent
+                            : previewContent(sanitizedContent),
+                    }}
+                />
+                {post.content.length > 200 && (
+                    <button
+                        onClick={handleReadMoreToggle}
+                        className="text-blue-400 text-sm ml-2"
+                    >
+                        {isContentExpanded ? 'Read Less' : 'Read More'}
+                    </button>
+                )}
             </div>
 
             {post.imageUrl && (
@@ -216,7 +207,6 @@ const PostCard = ({ post }) => {
                             <h3 className="text-white text-lg">Comments</h3>
                             {comments.map((comment) => (
                                 <div key={comment._id} className="flex items-start gap-2 mt-2">
-                                    {/* Check if the user data is available */}
                                     <Avatar className="w-6 h-6">
                                         <AvatarImage
                                             src={comment.user ? comment.user.avatar || '/default-avatar.png' : '/default-avatar.png'}
@@ -233,7 +223,6 @@ const PostCard = ({ post }) => {
                             ))}
                         </div>
                     )}
-
                 </div>
             )}
         </div>

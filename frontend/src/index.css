@@ -56,6 +56,13 @@
     --chart-5: 340 75% 55%
   }
 }
+/* Global styles file */
+@layer components {
+  .custom-placeholder .ql-editor::placeholder {
+      color: rgba(255, 255, 255, 0.6); /* Light grey with opacity */
+  }
+}
+
 @layer base {
   * {
     @apply border-border;

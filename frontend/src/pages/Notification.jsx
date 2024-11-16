@@ -3,6 +3,7 @@ import { io } from 'socket.io-client';
 import Notifications from './Notifications';
 import { useSelector } from 'react-redux';
 import Navbar from '@/shared/Navbar';
+import { USER_API_END_POINT } from '@/utils/constant';
 
 const Notification = () => {
     const [notifications, setNotifications] = useState([]);
@@ -11,7 +12,7 @@ const Notification = () => {
 
     useEffect(() => {
         // If the user is on the notifications page, reset unread count to 0
-        if (location.pathname.includes(`$/b/notifications/${user.id}`)) {
+        if (location.pathname.includes(`${USER_API_END_POINT}/b/notifications/${user.id}`)) {
           setUnreadCount(0);
         }
       }, [location]);

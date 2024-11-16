@@ -1,29 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { POST_API_END_POINT } from '@/utils/constant';
 import axios from 'axios';
-import TextareaAutosize from "react-textarea-autosize";
 import { useSelector } from 'react-redux';
-import { MdPhotoLibrary } from 'react-icons/md'; // Gallery icon
-import { ImSpinner2 } from 'react-icons/im'; // Spinner icon
+import { MdPhotoLibrary } from 'react-icons/md';
+import { ImSpinner2 } from 'react-icons/im';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
+import "./styles/quill.css";
 
 const CreatePostDialog = ({ open, setOpen }) => {
-  const { user } = useSelector(store => store.auth);
-  const [input, setInput] = useState({
-    content: "",
-    imageUrl: null,
-  });
+  const { user } = useSelector((store) => store.auth);
+  const [content, setContent] = useState('');
+  const [input, setInput] = useState({ imageUrl: null });
   const [loading, setLoading] = useState(false);
 
-  const changeEventHandler = (e) => {
-    setInput({ ...input, [e.target.name]: e.target.value });
-  };
+  const quillRef = useRef(null); // Create a ref for ReactQuill
 
   const imageChangeHandler = (e) => {
     const file = e.target.files[0];
     if (file) {
       const imageUrl = URL.createObjectURL(file);
-      setInput({ ...input, imageUrl: imageUrl, imageFile: file });
+      setInput({ ...input, imageUrl, imageFile: file });
     }
   };
 
@@ -32,55 +30,57 @@ const CreatePostDialog = ({ open, setOpen }) => {
     setLoading(true);
 
     const formData = new FormData();
-    formData.append("content", input.content);
-    formData.append("userId", user?.id);
+    formData.append('content', content);
+    formData.append('userId', user?.id);
 
     if (input.imageFile) {
-      formData.append("image", input.imageFile);
+      formData.append('image', input.imageFile);
     }
 
     try {
       const res = await axios.post(`${POST_API_END_POINT}/feed`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
+        headers: { 'Content-Type': 'multipart/form-data' },
         withCredentials: true,
       });
 
       if (res.status === 201) {
         setOpen(false);
-        setInput({ content: "", imageUrl: null, imageFile: null });
+        setContent('');
+        setInput({ imageUrl: null, imageFile: null });
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
     } finally {
       setLoading(false);
     }
   };
-
+  
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="bg-slate-950 max-h-[80vh] overflow-y-auto p-4" onInteractOutside={() => setOpen(false)}>
+      <DialogContent
+        className="bg-slate-950 max-h-[80vh] overflow-y-auto p-4"
+        onInteractOutside={() => setOpen(false)}
+      >
         <DialogHeader>
           <DialogTitle className="text-white">Create Post</DialogTitle>
         </DialogHeader>
         <form onSubmit={submitHandler}>
-          <TextareaAutosize
-            className='w-full outline-none p-2 bg-gray-900 text-gray-100'
-            name="content"
-            value={input.content}
-            onChange={changeEventHandler}
+          <ReactQuill
+            ref={quillRef} // Attach ref to ReactQuill
+            theme="snow"
+            value={content}
+            onChange={setContent}
             placeholder="What you want to ask and share"
+            className="bg-gray-900 text-white text-sm rounded-md mb-3"
           />
 
           <div className="my-3">
             <label htmlFor="image" className="block text-white cursor-pointer">
-              <MdPhotoLibrary size={30} className="text-gray-300 hover:text-gray-500" />
+              <MdPhotoLibrary size={30} className="text-gray-100 hover:text-gray-500" />
             </label>
             <input
               id="image"
               type="file"
-              name="imageUrl"
               accept="image/*"
               onChange={imageChangeHandler}
               className="hidden"
@@ -106,7 +106,7 @@ const CreatePostDialog = ({ open, setOpen }) => {
               {loading ? (
                 <ImSpinner2 className="animate-spin h-5 w-5 mr-2" />
               ) : (
-                "Create"
+                'Create'
               )}
             </button>
           </DialogFooter>

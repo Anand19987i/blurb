@@ -2,16 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setUser } from '@/redux/authSlice';
 import { Link, useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage } from '@/components/ui/avatar';
-import { AiFillHome } from "react-icons/ai";
 import { IoSearch } from "react-icons/io5";
 import { LogOut, User2 } from 'lucide-react';
 import axios from 'axios';
 import { USER_API_END_POINT, NOTIFICATION_API_END_POINT } from '@/utils/constant';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { IoMdNotifications } from "react-icons/io";
-import { FaBell } from 'react-icons/fa';
 import { BiSolidBell, BiSolidHome } from "react-icons/bi";
 
 const Navbar = () => {
@@ -26,10 +22,12 @@ const Navbar = () => {
 
   // Fetch notifications and update unread count
   useEffect(() => {
+    console.log("Fetching notifications for user:", user?.id);  // Add a log here
     if (user) {
       const fetchNotifications = async () => {
         try {
           const response = await axios.get(`${NOTIFICATION_API_END_POINT}/b/notifications/${user.id}`, { withCredentials: true });
+          console.log("Fetched notifications:", response.data.notifications); // Add log for fetched data
           setNotifications(response.data.notifications);
           const unreadNotifications = response.data.notifications.filter(n => !n.isRead);
           setUnreadCount(unreadNotifications.length);
@@ -40,6 +38,26 @@ const Navbar = () => {
       fetchNotifications();
     }
   }, [user]);
+  
+  // Mark notification as read
+  const markNotificationAsRead = async (notificationId) => {
+    try {
+      // Assuming you have an API to mark the notification as read
+      await axios.post(`${NOTIFICATION_API_END_POINT}/markAsRead/${notificationId}`, { withCredentials: true });
+
+      // Update local notifications state
+      setNotifications((prevNotifications) =>
+        prevNotifications.map((notification) =>
+          notification.id === notificationId ? { ...notification, isRead: true } : notification
+        )
+      );
+
+      // Update unread count
+      setUnreadCount((prevCount) => prevCount - 1);
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+    }
+  };
 
   const handleSearchChange = async (e) => {
     const query = e.target.value;
@@ -84,7 +102,6 @@ const Navbar = () => {
         <Link to="/" className="text-2xl font-bold text-white">Blurb</Link>
 
         {/* Search */}
-        {/* Search */}
         <div className="relative flex justify-center items-center">
           <IoSearch
             className="h-8 w-8 text-white cursor-pointer"
@@ -120,7 +137,6 @@ const Navbar = () => {
             </div>
           )}
         </div>
-
 
         {/* Icons */}
         <div className="flex items-center justify-center gap-6">

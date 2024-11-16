@@ -29,3 +29,34 @@ export const getNotifications = async (req, res) => {
         });
     }
 };
+// Mark a single notification as read
+export const markNotificationAsRead = async (req, res) => {
+    const { notificationId } = req.params; // Get notificationId from request params
+
+    try {
+        const notification = await Notification.findByIdAndUpdate(
+            notificationId,
+            { isRead: true },
+            { new: true } // Return the updated notification
+        );
+
+        if (!notification) {
+            return res.status(404).json({
+                message: "Notification not found.",
+                success: false,
+            });
+        }
+
+        return res.status(200).json({
+            message: "Notification marked as read.",
+            success: true,
+            notification,
+        });
+    } catch (error) {
+        console.error("Error marking notification as read:", error);
+        return res.status(500).json({
+            message: "Internal Server Error",
+            success: false,
+        });
+    }
+};

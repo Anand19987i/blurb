@@ -2,25 +2,45 @@ import { useSelector } from 'react-redux';
 import { NOTIFICATION_API_END_POINT } from '@/utils/constant';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const Notifications = () => {
-    // Get userId from Redux store
     const { user } = useSelector(store => store.auth);
     
     const [notifications, setNotifications] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const userId = user?.id;
+    const [unreadCount, setUnreadCount] = useState(0);
+    const location = useLocation();
+    const navigate = useNavigate(); // Use useNavigate hook for redirection
+
+    // Function to mark notification as read
+    const markNotificationAsRead = async (notificationId) => {
+        try {
+            await axios.post(`${NOTIFICATION_API_END_POINT}/markAsRead/${notificationId}`, { withCredentials: true });
+
+            setNotifications((prevNotifications) =>
+                prevNotifications.map((notification) =>
+                    notification.id === notificationId ? { ...notification, isRead: true } : notification
+                )
+            );
+
+            setUnreadCount((prevCount) => prevCount - 1);
+        } catch (error) {
+            console.error("Error marking notification as read:", error);
+        }
+    };
 
     useEffect(() => {
         console.log("User ID from Redux before fetching notifications:", userId);
-      
+        
         if (!userId) {
             setError("Invalid user ID");
             setLoading(false);
             return;
         }
-      
+
         const fetchNotifications = async () => {
             try {
                 const response = await axios.get(
@@ -35,15 +55,27 @@ const Notifications = () => {
                 setLoading(false);
             }
         };
-      
+
         fetchNotifications();
     }, [userId]);
+
+    // Reset unread count to 0 when on the notifications page
     useEffect(() => {
-        // If the user is on the notifications page, reset unread count to 0
-        if (location.pathname.includes(`$/b/notifications/${user.id}`)) {
-          setUnreadCount(0);
+        if (location.pathname.includes(`/b/notifications/${user.id}`)) {
+            setUnreadCount(0);
         }
-      }, [location]);
+    }, [location, user.id]);
+
+    // Handle notification click to navigate to specific post
+    const handleNotificationClick = (notification) => {
+        if (notification.postId) {
+            // Assuming the notification contains a 'postId' field
+            navigate(`/posts/${notification.postId}`); // Redirect to the specific post page
+        } else {
+            // Handle other types of notifications here
+            console.log("Notification clicked, but no postId associated");
+        }
+    };
 
     if (loading) return (
         <div className="flex justify-center items-center">
@@ -64,6 +96,10 @@ const Notifications = () => {
                             className={`p-3 mb-2 rounded cursor-pointer transition hover:bg-gray-700 ${
                                 notification.isRead ? 'bg-gray-100' : 'bg-gray-800'
                             }`}
+                            onClick={() => {
+                                markNotificationAsRead(notification._id);
+                                handleNotificationClick(notification);
+                            }}
                         >
                             <p className="text-white">{notification.message}</p>
                             <span className="text-sm text-gray-400">
