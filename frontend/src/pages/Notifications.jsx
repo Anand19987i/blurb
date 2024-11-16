@@ -94,7 +94,7 @@ const Notifications = () => {
                         <li
                             key={notification._id}
                             className={`p-3 mb-2 rounded cursor-pointer transition hover:bg-gray-700 ${
-                                notification.isRead ? 'bg-gray-100' : 'bg-gray-800'
+                                notification.isRead ? 'bg-gray-700' : 'bg-gray-800'
                             }`}
                             onClick={() => {
                                 markNotificationAsRead(notification._id);
