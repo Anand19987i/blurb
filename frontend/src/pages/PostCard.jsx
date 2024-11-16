@@ -138,7 +138,7 @@ const PostCard = ({ post }) => {
                 <Avatar className="w-10 h-10 sm:w-12 sm:h-12">
                     <AvatarImage src={post?.userId?.avatar || '/default-avatar.png'} />
                 </Avatar>
-                <div className="text-white text-sm sm:text-md">
+                <div className="text-white text-md sm:text-md">
                     <p className="font-semibold">{post?.userId?.name || 'Anonymous'}</p>
                     <span className="text-xs text-gray-300 sm:text-sm">{formattedTime}</span>
                 </div>
