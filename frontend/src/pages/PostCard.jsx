@@ -157,7 +157,7 @@ const PostCard = ({ post }) => {
                 </div>
             </div>
 
-            <div className="text-white px-3 text-justify text-sm sm:text-base md:px-4">
+            <div className="text-white px-3 text-sm sm:text-base md:px-4">
                 <p>
                     {isContentExpanded ? post.content : truncatedContent}
                     {post.content.length > 200 && (

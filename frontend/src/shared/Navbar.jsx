@@ -170,6 +170,7 @@ const Navbar = () => {
             </Popover>
           )}
         </div>
+        
       </div>
     </div>
   );
