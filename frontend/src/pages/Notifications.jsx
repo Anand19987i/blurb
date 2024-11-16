@@ -51,7 +51,7 @@ const Notifications = () => {
                 setLoading(false);
             } catch (err) {
                 console.error("Error fetching notifications:", err);
-                setError("Failed to fetch notifications");
+                setError("No Notifications Found");
                 setLoading(false);
             }
         };
