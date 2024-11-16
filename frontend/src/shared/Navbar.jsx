@@ -140,7 +140,7 @@ const Navbar = () => {
 
         {/* Icons */}
         <div className="flex items-center justify-center gap-6">
-          <div className='flex gap-5 '>
+          <div className='flex gap-5'>
             <Link to="/"><BiSolidHome className="h-8 w-8 text-white" /></Link>
             <Link to={`/b/notifications/${user?.id}`} onClick={() => setUnreadCount(0)}>
               <button className="relative">
@@ -153,6 +153,24 @@ const Navbar = () => {
               </button>
             </Link>
           </div>
+
+          {/* Login/Signup buttons */}
+          {!user && (
+            <div className="flex gap-4">
+              <Link to="/login">
+                <button className="text-gray-900 bg-white px-6 py-2 rounded-lg hover:bg-blue-600 transition duration-200">
+                  Login
+                </button>
+              </Link>
+              <Link to="/register">
+                <button className="text-white bg-gray-800 px-6 py-2 rounded-lg hover:bg-green-600 transition duration-200">
+                  Signup
+                </button>
+              </Link>
+            </div>
+          )}
+
+          {/* User Profile and Logout */}
           {user && (
             <Popover>
               <PopoverTrigger asChild>
