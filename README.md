@@ -41,9 +41,6 @@
 ### Search Users
 ![Search Users](frontend/public/search-users.png)
 
-## Known Issues
 
-- **Profile Updates:** Changes made to user profiles are reflected only after logging out and logging back in.
-- **Post Display Issue:** Posts are sometimes fetched incorrectly due to API deployment issues but work perfectly on localhost. This might be caused by backend configurations.
 
 
