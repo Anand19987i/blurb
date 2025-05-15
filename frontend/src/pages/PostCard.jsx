@@ -4,7 +4,7 @@ import { Avatar, AvatarImage } from '@/components/ui/avatar';
 import { useDispatch, useSelector } from 'react-redux';
 import moment from 'moment';
 import axios from 'axios';
-import DOMPurify from 'dompurify'; // Ensure you install it: npm install dompurify
+import DOMPurify from 'dompurify';
 import { POST_API_END_POINT } from '../utils/constant';
 
 const PostCard = ({ post }) => {
@@ -36,12 +36,6 @@ const PostCard = ({ post }) => {
     const handleAddComment = async () => {
         if (commentInput.trim()) {
             try {
-                const token = localStorage.getItem('auth_token');
-                if (!token) {
-                    console.error('No token found');
-                    return;
-                }
-
                 const newComment = {
                     user: { _id: user.id, name: user.name, avatar: user.avatar },
                     text: commentInput,
@@ -52,7 +46,7 @@ const PostCard = ({ post }) => {
                 const response = await axios.post(
                     `${POST_API_END_POINT}/posts/${post._id}/comment`,
                     { userId: user.id, text: commentInput },
-                    { headers: { Authorization: `Bearer ${token}` } }
+                    { withCredentials: true }
                 );
 
                 setComments(response.data.comments);
@@ -62,20 +56,16 @@ const PostCard = ({ post }) => {
             }
         }
     };
+
     const handleLikeClick = async () => {
-        const token = localStorage.getItem('auth_token');
-        if (!token) {
-            console.error('No token found');
-            return;
-        }
         setLikesCount(likesCount + 1);
         setLiked(true);
         try {
-            await axios.post(`${POST_API_END_POINT}/posts/${post._id}/like`, { userId: user.id }, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
+            await axios.post(
+                `${POST_API_END_POINT}/posts/${post._id}/like`,
+                { userId: user.id },
+                { withCredentials: true }
+            );
         } catch (error) {
             console.error('Error liking post:', error);
             setLikesCount(likesCount - 1);
@@ -83,37 +73,32 @@ const PostCard = ({ post }) => {
         }
     };
 
-
     const handleUnlikeClick = async () => {
-        const token = localStorage.getItem('auth_token');
-        if (!token) {
-            console.error('No token found');
-            return;
-        }
         setLikesCount(likesCount - 1);
         setLiked(false);
-
         try {
             const response = await axios.post(
                 `${POST_API_END_POINT}/posts/${post._id}/like`,
                 { userId: user.id },
-                { headers: { Authorization: `Bearer ${token}` } }
+                { withCredentials: true }
             );
             setLikesCount(response.data.post.likes.length);
-            setLiked(false);
         } catch (error) {
             console.error('Error unliking post:', error);
             setLikesCount(likesCount + 1);
             setLiked(true);
         }
     };
+
     const handleShareClick = () => {
         if (navigator.share) {
-            navigator.share({
-                title: 'Check out this post on Blurb!',
-                text: 'Here’s a great post you might like on Blurb.',
-                url: window.location.href,
-            }).then(() => console.log('Post shared successfully!'))
+            navigator
+                .share({
+                    title: 'Check out this post on Blurb!',
+                    text: 'Here’s a great post you might like on Blurb.',
+                    url: window.location.href,
+                })
+                .then(() => console.log('Post shared successfully!'))
                 .catch((error) => console.log('Error sharing:', error));
         } else {
             console.log('Share not supported on this browser.');
@@ -123,14 +108,12 @@ const PostCard = ({ post }) => {
     const handleReadMoreToggle = () => setIsContentExpanded(!isContentExpanded);
 
     const sanitizedContent = DOMPurify.sanitize(post.content);
-
     const previewContent = (content) => {
         const truncated = content.length > 200 ? content.slice(0, 200) + '...' : content;
         return DOMPurify.sanitize(truncated);
     };
 
     const formattedTime = moment(post.createdAt).fromNow();
-    const contentRef = useRef(null);
 
     return (
         <div className="bg-slate-900 flex flex-col mx-auto w-full sm:w-3/4 md:w-2/3 lg:w-1/2 xl:w-2/5 my-3 rounded-sm p-4">
@@ -173,9 +156,12 @@ const PostCard = ({ post }) => {
             )}
 
             <div className="flex items-center justify-around sm:justify-between p-3">
-                <button onClick={liked ? handleUnlikeClick : handleLikeClick} className={`flex items-center gap-2 p-2 rounded-md ${liked ? 'text-blue-500' : 'text-gray-400'}`}>
+                <button
+                    onClick={liked ? handleUnlikeClick : handleLikeClick}
+                    className={`flex items-center gap-2 p-2 rounded-md ${liked ? 'text-blue-500' : 'text-gray-400'}`}
+                >
                     {liked ? <MdThumbUp size={20} /> : <MdOutlineThumbUp size={20} />}
-                    <span>{likesCount} {liked ? 'Like' : 'Like'}</span>
+                    <span>{likesCount} Like</span>
                 </button>
 
                 <button onClick={handleCommentClick} className="flex items-center gap-2 p-2 rounded-md text-gray-400">
